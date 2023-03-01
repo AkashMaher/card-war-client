@@ -85,7 +85,7 @@ const JoinRoom: FC<any> = () =>  {
   };
 // console.log(isInRoom)
   return (
-    <div className="bg-[#0b0116] bg-opacity-60 border-2 border-zinc-900  p-8 box-border border-solid rounded-xl m-5">
+    <div className="bg-[#0b0116] text-white bg-opacity-60 border-2 border-zinc-900  p-8 box-border border-solid rounded-xl m-5">
     
     <form >
       <div className="w-[100%] gap-5  h-[100%]  flex align-middle justify-center  flex-col">

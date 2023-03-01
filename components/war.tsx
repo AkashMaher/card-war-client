@@ -596,11 +596,11 @@ draw draw draw {
         {/* <p className="text-white m-0 text-2xl font-mono font-bold ">Remaining Cards<span id="remainingCards"> 52</span></p> */}
         {/* <button onClick={()=> DrawYourCard()}>Draw</button> */}
         
-           <button className="outline-none p-3 rounded-[12px] bg-violet-900 text-[#ffffff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 cursor-pointer  hover:border-2 hover:text-[#bee2ef] " 
+           <button className="outline-none p-3 rounded-[12px] bg-violet-900 text-[#fff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 cursor-pointer  hover:border-2 hover:text-[#bee2ef] " 
            onClick={()=> (!isSuffled ?suffleCards():gameOver?suffleCards(): DrawYourCard())}>
             {gameOver?"Play Again":!isSuffled?"Suffle Cards":"Draw Card"}
             </button>
-         <p>Remaining Cards : You = {data?.cards?.you.length} , Opponent = {data?.cards?.opponent.length}</p>
+         <p className="text-white">Remaining Cards : You = {data?.cards?.you.length} , Opponent = {data?.cards?.opponent.length}</p>
     </div>
     </>}
     </>
