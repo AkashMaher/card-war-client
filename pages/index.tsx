@@ -21,7 +21,7 @@ const Home = () => {
     // const [Loading,setLoading] = useState(true)
     // const [formData, setFormData] = useState(initialFormState)
     // const [checkIfNewUser,setIfNewUser] = useState(false)
-
+    const [roomID ,setRoomId] = useState('')
     const [isInRoom, setInRoom] = useState(false);
     const [isPlayerTurn, setPlayerTurn] = useState(false);
     const [isGameStarted, setGameStarted] = useState(false);
@@ -29,6 +29,11 @@ const Home = () => {
     // const [playerPoints,setPlayerpoints] = useState(0)
     // const [cards, setCards] = useState<any>()
 
+    const checkRoom = (_value:any)=> {
+      if(_value) {
+        setRoomId(_value)
+      }
+    }
     const connectSocket = async () => {
     const socket = await socketService
       .connect(server)
@@ -66,9 +71,9 @@ const Home = () => {
         </div>
         
        <div className="w-[100%] h-[100%] flex align-center-top justify-center">
-          {!isInRoom && <JoinRoom />}
+          {!isInRoom && <JoinRoom checkRoom={checkRoom}/>}
           {/* {isInRoom && <Game />} */}
-          {isInRoom && <WarGame />}
+          {isInRoom && <WarGame roomId={roomID} />}
         </div>
       </div>
     </GameContext.Provider> 
