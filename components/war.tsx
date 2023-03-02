@@ -542,29 +542,29 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
   }
 
 
-  const handleDrawns = async () => {
-    if(socketService?.socket) {
-      await gameService.onDrawCard(socketService.socket, (cards) => {
-        // console.log(cards)
-        // if(cards?.you?.value == 0 && cards?.opponent?.value == 0) return;
+  // const handleDrawns = async () => {
+  //   if(socketService?.socket) {
+  //     await gameService.onDrawCard(socketService.socket, (cards) => {
+  //       // console.log(cards)
+  //       // if(cards?.you?.value == 0 && cards?.opponent?.value == 0) return;
 
-        if(cards?.you?.value == 0 || cards?.you?.value == 0) {
-          setDrawn(cards)
-          setYourCard(cards?.you)
-          setOpponentCard(cards?.opponent)
-          return
-        }
-        setDrawn(cards)
-        setYourCard(cards?.you)
-        setOpponentCard(cards?.opponent)
-      })
-    }
-  }
+  //       if(cards?.you?.value == 0 || cards?.you?.value == 0) {
+  //         setDrawn(cards)
+  //         setYourCard(cards?.you)
+  //         setOpponentCard(cards?.opponent)
+  //         return
+  //       }
+  //       setDrawn(cards)
+  //       setYourCard(cards?.you)
+  //       setOpponentCard(cards?.opponent)
+  //     })
+  //   }
+  // }
 
 
-  useEffect(()=> {
-    handleDrawns()
-  })
+  // useEffect(()=> {
+  //   handleDrawns()
+  // })
   const handleGameUpdate = () => {
     if (socketService.socket)
       gameService.onGameUpdate(socketService.socket, async (newData) => {
