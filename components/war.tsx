@@ -359,7 +359,7 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
                 suffled:true,
               }
 
-              return await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData), setIsChecking(false);
+               await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData), setIsChecking(false);
             } 
 
           } else if(newData?.WarCards?.you[num].value < newData?.WarCards?.opponent[num].value) {
@@ -394,7 +394,7 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
                 suffled:true,
               }
 
-              return await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData), setIsChecking(false);
+               await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData), setIsChecking(false);
             } 
           }
 
@@ -421,7 +421,7 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
               suffled:true,
             }
 
-            return await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData), setIsChecking(false);
+             await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData), setIsChecking(false);
           } 
         }
   } 
@@ -478,7 +478,7 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
           suffled:true,
         }
 
-        return await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData), setIsChecking(false);
+         await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData), setIsChecking(false);
       }
       // newData.points.opponent += totalPoints
       // newData.points.you = newData.points.you == 0?0:newData.points.you-newData?.drawnCards.you.value
@@ -514,7 +514,7 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
           suffled:true,
         }
 
-        return await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData), setIsChecking(false);
+         await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData), setIsChecking(false);
       } 
       // newData.points.you += totalPoints
       // newData.points.opponent = newData.points.opponent == 0?0:newData.points.opponent-newData?.drawnCards.opponent.value
@@ -565,6 +565,8 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
         checkGameState(newData);
         setPlayerTurn(true);
         checkCard();
+        await checkOppCard();
+        await isGameOver();
         // return newData;
       }
       });
@@ -602,6 +604,11 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
       })
   }
 
+  const isGameOver = () => {
+    if(data?.cards.opponent.length == 0 || data?.cards?.you.length == 0) {
+      setGameOver(true)
+    } 
+  }
 
 
   useEffect(() => {
@@ -629,7 +636,11 @@ draw draw draw {
 */
 // console.log(gameOver)
 
-
+const checkOppCard= ()=> {
+  if(data?.isYourTurn && opponentCard?.value == 0) {
+    setOpponentCard(data?.drawnCards?.opponent)
+  }
+}
 useEffect(()=> {
   if(data?.isYourTurn && opponentCard?.value == 0) {
     setOpponentCard(data?.drawnCards?.opponent)
