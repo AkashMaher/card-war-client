@@ -88,7 +88,7 @@ class Deck {
                 topCard = point.value;
             }
 
-            console.log(`WAR: Player ${player} draws ${point.value} of ${point.suit}`)
+            // console.log(`WAR: Player ${player} draws ${point.value} of ${point.suit}`)
         }
         return {
             points:points,
@@ -129,13 +129,9 @@ export type IPlayCards = {
     isWar:boolean
   }
 
-type WarCards = {you:Card[], opponent:Card[]}
- type GameData = {
-  player: any[]
-  opponent: any[],
-  
+export type DrawCards = {
+  you:Card, opponent:Card
 }
-
 const WarGame:FC<{roomId:any}> = ({roomId}) => {
    
 //   const [Cards, setCards] = useState<any>({})
@@ -150,6 +146,8 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
   const [drawnYour,setdrawnYour] = useState('')
   const [drawnOpponent,setdrawnOpponent] = useState('')
   const [gameOver,setGameOver] = useState(false)
+  const [drawnCards,setDrawn] = useState<DrawCards>()
+  const [copyText,setCopy] = useState('Copy Room ID')
   const initialCard = {
     value:0,
     suit:''
@@ -250,6 +248,8 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
       setdrawnYour(yourCard.value>0?`/images/cards/${name}_${value}.png`:`/images/cards/wait_card.png`)
     }
   },[opponentCard,yourCard])
+
+
   const DrawYourCard = async () => {
     const newData = data
   
@@ -267,7 +267,9 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
       setYourCard(card)
       newData.drawnCards.you.value = card?.value
       newData.drawnCards.you.suit = card?.suit
-      
+
+      const myCards:any = {you: card, opponent:drawnCards?.opponent}
+      const ForServer:any = {you:drawnCards?.opponent,opponent:card}
       if(newData?.isWar || newData?.drawnCards.opponent.value == newData?.drawnCards.you.value) {
         newData?.WarCards.you.push(card)
       } else {
@@ -276,6 +278,7 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
       newData.isYourTurn = false
 
       await setData(newData)
+      await setDrawn(myCards)
 
       if(socketService.socket) {
         const updatedForMe: IPlayCards = {
@@ -298,7 +301,7 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
           suffled:true,
         }
 
-        return await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData),await handleCheckCards();
+        return await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData), await gameService.drawCard(socketService.socket, ForServer), await handleCheckCards();
       }
     // } 
   }
@@ -323,7 +326,7 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
   })
 
   const handleWar = async (newData:IPlayCards) => {
-    console.log('war handle')
+    // console.log('war handle')
     if((newData?.WarCards.you.length%4 == 0) && (newData?.WarCards?.opponent.length%4 ==0)) {
       let num = newData?.WarCards.you.length-1
           if(newData?.WarCards?.you[num].value > newData?.WarCards?.opponent[num].value) {
@@ -338,7 +341,10 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
             setResult(`You Won the War Round`)
             newData.drawnCards.opponent  = initialCard
             newData.drawnCards.you = initialCard
+            const myCards:any = {you: initialCard, opponent:initialCard}
+            await setDrawn(myCards)
             if(socketService.socket) {
+              
               const updatedForMe: IPlayCards = {
                 cards:{you:newData.cards.you,opponent:newData.cards.opponent},
                 WarCards:{you:newData?.WarCards.you,opponent:newData?.WarCards.opponent},
@@ -358,7 +364,7 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
                 isYourTurn:true,
                 suffled:true,
               }
-
+              await gameService.drawCard(socketService.socket,myCards)
                await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData), setIsChecking(false);
             } 
 
@@ -373,6 +379,8 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
             newData.drawnCards.opponent  = initialCard
             newData.drawnCards.you = initialCard
             setResult(`Opponent Won the War Round`)
+            const myCards:any = {you: initialCard, opponent:initialCard}
+            await setDrawn(myCards)
             if(socketService.socket) {
               const updatedForMe: IPlayCards = {
                 cards:{you:newData.cards.you,opponent:newData.cards.opponent},
@@ -393,7 +401,7 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
                 isYourTurn:true,
                 suffled:true,
               }
-
+              await gameService.drawCard(socketService.socket,myCards)
                await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData), setIsChecking(false);
             } 
           }
@@ -420,7 +428,10 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
               isYourTurn:true,
               suffled:true,
             }
-
+            const myCards:any = {you: newData.drawnCards.you, opponent:newData.drawnCards.opponent}
+            const forServer:any = {you:newData.drawnCards.opponent,opponent:newData.drawnCards.you}
+            await setDrawn(myCards)
+            await gameService.drawCard(socketService.socket,forServer)
              await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData), setIsChecking(false);
           } 
         }
@@ -429,8 +440,8 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
     setIsChecking(true)
     const newData = data
     if(!newData) return console.log('no data'), setIsChecking(false)
-    console.log('VALUE OF YOU : ', newData.drawnCards.you.value)
-    console.log('VALUE OF OPPONENT : ', newData.drawnCards.opponent.value)
+    // console.log('VALUE OF YOU : ', newData.drawnCards.you.value)
+    // console.log('VALUE OF OPPONENT : ', newData.drawnCards.opponent.value)
     if(!newData.cards.opponent.length || !newData.cards.you.length) {
       let newMessage = !newData.cards.opponent.length?"Opponent Won The Game":"You Won The Game"
       setGameOver(true)
@@ -456,7 +467,8 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
       newData.drawnCards.you = initialCard
 
       await setData(newData)
-
+      const myCards:any = {you: initialCard, opponent:initialCard}
+      await setDrawn(myCards)
       if(socketService.socket) {
         const updatedForMe: IPlayCards = {
           cards:{you:newData.cards.you,opponent:newData.cards.opponent},
@@ -477,7 +489,7 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
           isYourTurn:true,
           suffled:true,
         }
-
+        await gameService.drawCard(socketService.socket,myCards)
          await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData), setIsChecking(false);
       }
       // newData.points.opponent += totalPoints
@@ -492,7 +504,8 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
       newData.drawnCards.you = initialCard
 
       await setData(newData)
-
+      const myCards:any = {you: initialCard, opponent:initialCard}
+      await setDrawn(myCards)
       if(socketService.socket) {
         const updatedForMe: IPlayCards = {
           cards:{you:newData.cards.you,opponent:newData.cards.opponent},
@@ -513,7 +526,7 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
           isYourTurn:true,
           suffled:true,
         }
-
+        await gameService.drawCard(socketService.socket,myCards)
          await setData(updatedForMe), await gameService.updateGame(socketService.socket, updatedData), setIsChecking(false);
       } 
       // newData.points.you += totalPoints
@@ -528,6 +541,30 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
     
   }
 
+
+  const handleDrawns = async () => {
+    if(socketService?.socket) {
+      await gameService.onDrawCard(socketService.socket, (cards) => {
+        // console.log(cards)
+        // if(cards?.you?.value == 0 && cards?.opponent?.value == 0) return;
+
+        if(cards?.you?.value == 0 || cards?.you?.value == 0) {
+          setDrawn(cards)
+          setYourCard(cards?.you)
+          setOpponentCard(cards?.opponent)
+          return
+        }
+        setDrawn(cards)
+        setYourCard(cards?.you)
+        setOpponentCard(cards?.opponent)
+      })
+    }
+  }
+
+
+  useEffect(()=> {
+    handleDrawns()
+  })
   const handleGameUpdate = () => {
     if (socketService.socket)
       gameService.onGameUpdate(socketService.socket, async (newData) => {
@@ -556,11 +593,18 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
         await setData(newData)
         let n1 = newData.drawnCards.you.value
         let n2 = newData.drawnCards.opponent.value
-        console.log(n1,n2)
-        let your = n1 > 0 || n2 > 0 ?newData.drawnCards.you:yourCard
+        // console.log(n1,n2)
+
+        if(n1 !== 0 && n2 !== 0) {
+          await setYourCard(yourCard)
+          await setOpponentCard(opponentCard)
+        } else {
+          let your = n1 > 0 || n2 > 0 ?newData.drawnCards.you:yourCard
         let opp = n1 > 0 || n2 > 0 ?newData.drawnCards.opponent:opponentCard
         await setYourCard(your)
         await setOpponentCard(opp)
+        }
+        
         // console.log(newData)
         checkGameState(newData);
         setPlayerTurn(true);
@@ -577,7 +621,7 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
     if (socketService.socket)
       gameService.onStartGame(socketService.socket, (options) => {
         setGameStarted(true);
-        console.log(options)
+        // console.log(options)
         // setPlayerSymbol(options.symbol);
         if (options.start) setPlayerTurn(true);
         else setPlayerTurn(false);
@@ -588,20 +632,23 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
   const handleGameWin = () => {
     if (socketService.socket)
       gameService.onGameWin(socketService.socket, (message) => {
-        console.log("Here", message);
+        // console.log("Here", message);
         setPlayerTurn(false);
         setResult(message)
+        return
         // alert(message);
       });
   };
 
-  const copyRoomId = () => {
-    navigator.clipboard.writeText(roomId)
-    toast.dark(`Copied: Share with your friends`, {
-        type:'success',
-        hideProgressBar:true,
-        autoClose:2000
-      })
+  const copyRoomId = async () => {
+    setCopy('Copied')
+    await navigator.clipboard.writeText(roomId)
+    // toast.dark(`Copied`, {
+    //     type:'success',
+    //     hideProgressBar:true,
+    //     autoClose:100
+    //   })
+    // setCopy('Copy Room ID')
   }
 
   const isGameOver = () => {
@@ -720,7 +767,7 @@ useEffect(()=> {
                 <button 
                   className="outline-none text-xl p-3 rounded-[12px] bg-violet-900 text-[#ffffff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 mt-4 cursor-pointer bg-gradient-to-r hover:border-2 hover:text-[#b779d1] align-middle "
                   onClick={()=> copyRoomId()} >
-                            {"Copy Room ID"}
+                            {copyText}
                 </button>
                 {/* <div ><Image src={drawnOpponent?drawnOpponent:`/images/cards/wait_card.png`} width={'520px'} height={'316px'}/></div> */}
                 <p className="m-0 mt-2 text-lg font-sans"></p>
@@ -733,7 +780,7 @@ useEffect(()=> {
         {/* <button onClick={()=> DrawYourCard()}>Draw</button> */}
         
            {isGameStarted && !gameOver && isSuffled && <button className="outline-none p-3 rounded-[12px] bg-violet-900 text-[#fff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 cursor-pointer  hover:border-2 hover:text-[#bee2ef] " 
-           onClick={()=>  (!isSuffled ?suffleCards(): DrawYourCard())}>
+           onClick={()=>  (!isSuffled ?suffleCards(): DrawYourCard())} disabled={!data?.isYourTurn}>
             {(!isSuffled?"Suffle Cards":"Draw Card")}
             </button>
             }
