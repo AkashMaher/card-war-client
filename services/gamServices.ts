@@ -1,6 +1,6 @@
 import { Socket } from "socket.io-client";
 // import { IPlayMatrix, IStartGame } from "../components/game";
-import {IPlayCards, IStartGame, IJoinGame} from '../components/war'
+import {IPlayCards, IStartGame, DrawCards} from '../components/war'
 class GameService {
   public async joinGameRoom(socket: Socket, roomId: string): Promise<any> {
     return new Promise((rs, rj) => {
@@ -21,7 +21,16 @@ class GameService {
     socket.on("on_game_update", ({ GameData }) => listiner(GameData));
   }
   
+  public async drawCard(socket: Socket, cards: DrawCards) {
+    socket.emit("draw_card", { cards: cards });
+  }
 
+  public async onDrawCard(
+    socket: Socket,
+    listiner: (cards: DrawCards) => void
+  ) {
+    socket.on("on_draw_card", ({ cards }) => listiner(cards));
+  }
 
   public async onStartGame(
     socket: Socket,
