@@ -665,11 +665,12 @@ useEffect(()=> {
             </>}
             {
               isGameStarted && !isSuffled && !gameOver && <>
-              <div className="text-2xl font-bold font-sans flex flex-col items-center w-[520px] h-[316px] sm:w-[310px] sm:h-[250px] sm:text-xl gap-6">
+              <div className="text-2xl font-bold font-sans flex flex-col items-center w-[520px] h-[316px] sm:w-[310px] sm:h-[300px] sm:text-xl gap-5">
                 
                 <p >Suffle Cards to Start Game</p>
                 <p ></p>
                 <p ></p>
+                <div ><Image src={`/images/game_start_wait.png`} width={'250px'} height={'130px'}/></div>
                 <button 
                   className="outline-none text-xl p-3 rounded-[12px] bg-violet-900 text-[#ffffff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 mt-4 cursor-pointer bg-gradient-to-r hover:border-2 hover:text-[#b779d1] align-middle "
                   onClick={()=> suffleCards()} >
@@ -682,7 +683,7 @@ useEffect(()=> {
             }
             {
               isGameStarted && gameOver && <>
-              <div className="text-3xl font-sans flex flex-col items-center w-[520px] h-[316px] sm:w-[310px] sm:h-[250px] sm:text-xl gap-6">
+              <div className="text-3xl font-sans flex flex-col items-center w-[520px] h-[316px] sm:w-[310px] sm:h-[300px] sm:text-xl gap-6">
                 
                 {/* <p >{resultMessage}</p> */}
                 <p className="text-xl">{resultMessage=='You Won The Game'?"Congratulations":'Better Luck Next Time'}</p>
