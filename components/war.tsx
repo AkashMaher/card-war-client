@@ -595,15 +595,17 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
         let n2 = newData.drawnCards.opponent.value
         // console.log(n1,n2)
 
-        if(n1 !== 0 && n2 !== 0) {
-          await setYourCard(yourCard)
-          await setOpponentCard(opponentCard)
-        } else {
-          let your = n1 > 0 || n2 > 0 ?newData.drawnCards.you:yourCard
+        // if(n1 !== 0 && n2 !== 0) {
+        //   await setYourCard(yourCard)
+        //   await setOpponentCard(opponentCard)
+        // } else {
+        if(newData?.drawnCards.opponent.value>0) {
+        let your = n1 > 0 || n2 > 0 ?newData.drawnCards.you:yourCard
         let opp = n1 > 0 || n2 > 0 ?newData.drawnCards.opponent:opponentCard
         await setYourCard(your)
         await setOpponentCard(opp)
         }
+        // }
         
         // console.log(newData)
         checkGameState(newData);
