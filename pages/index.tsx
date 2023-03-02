@@ -71,7 +71,7 @@ const Home = () => {
         </div>
         
        <div className="w-[100%] h-[100%] flex align-center-top justify-center">
-          {!isInRoom && <JoinRoom checkRoom={checkRoom}/>}
+          {!isInRoom && <JoinRoom checkRoom={checkRoom} setGameStarted={setGameStarted}/>}
           {/* {isInRoom && <Game />} */}
           {isInRoom && <WarGame roomId={roomID} />}
         </div>

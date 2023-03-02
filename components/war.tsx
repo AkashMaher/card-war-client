@@ -8,6 +8,7 @@ import socketService from "../services/socketServices";
 import useIsMounted from "../utils/hooks/useIsMounted";
 import Image from "next/image";
 import { toast } from "react-toastify";
+import JoinRoom from "./joinRoom";
 class Card {
   value: any;
   suit: any;
@@ -112,6 +113,11 @@ export interface IStartGame {
   start: boolean;
 }
 
+export interface IJoinGame {
+  joined:boolean,
+  users:any[],
+  size:number
+}
 
 export type IPlayCards = {
     cards: {you:Card[], opponent:Card[]},
@@ -248,7 +254,11 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
     const newData = data
   
     if(!newData?.isYourTurn) {
-      return console.log('Opponent Turn, wait for your turn'), toast.error('Opponent Turn, wait for your turn')
+      return console.log('Opponent Turn, wait for your turn'), toast.dark('Opponent Turn, wait for your turn', {
+        type:'error',
+        hideProgressBar:true,
+        autoClose:2000
+      })
     } 
     
     const card:any = newData.cards.you.pop()
@@ -565,7 +575,7 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
     if (socketService.socket)
       gameService.onStartGame(socketService.socket, (options) => {
         setGameStarted(true);
-        
+        console.log(options)
         // setPlayerSymbol(options.symbol);
         if (options.start) setPlayerTurn(true);
         else setPlayerTurn(false);
@@ -585,8 +595,13 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
 
   const copyRoomId = () => {
     navigator.clipboard.writeText(roomId)
-    toast.info(`Copied: Share with your friends`)
+    toast.dark(`Copied: Share with your friends`, {
+        type:'success',
+        hideProgressBar:true,
+        autoClose:2000
+      })
   }
+
 
 
   useEffect(() => {
@@ -612,7 +627,16 @@ draw draw draw {
 }
  }
 */
-// console.log(drawnYour)
+// console.log(gameOver)
+
+
+useEffect(()=> {
+  if(data?.isYourTurn && opponentCard?.value == 0) {
+    setOpponentCard(data?.drawnCards?.opponent)
+  }
+},[data,opponentCard])
+
+
 
   return (
     <>
@@ -622,7 +646,7 @@ draw draw draw {
         
         <><h3 className="text-white m-0 font-bold text-2xl font-sans">{isGameStarted?"A Game of War!":`ROOM ID : ${roomId}`}</h3>
         
-        <h3 className="text-white m-0 font-bold text-2xl font-sans">{isGameStarted?(yourCard?.value>0 && opponentCard?.value>0?resultMessage:'Waiting For Cards'):''}</h3>
+        <h3 className="text-white m-0 font-bold text-2xl font-sans">{isGameStarted?(yourCard?.value>0 && opponentCard?.value>0?resultMessage:!isSuffled?'Joined Lobby':'Waiting For Cards'):''}</h3>
         </>
         
         
@@ -640,11 +664,11 @@ draw draw draw {
             </div> 
             </>}
             {
-              isGameStarted && !isSuffled && <>
-              <div className="text-3xl font-sans flex flex-col items-center w-[520px] h-[316px] gap-6">
+              isGameStarted && !isSuffled && !gameOver && <>
+              <div className="text-2xl font-bold font-sans flex flex-col items-center w-[520px] h-[316px] sm:w-[310px] sm:h-[250px] sm:text-xl gap-6">
                 
-                <p >Opponent Joined</p>
-                <p >Shuffle & Deal Cards</p>
+                <p >Suffle Cards to Start Game</p>
+                <p ></p>
                 <p ></p>
                 <button 
                   className="outline-none text-xl p-3 rounded-[12px] bg-violet-900 text-[#ffffff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 mt-4 cursor-pointer bg-gradient-to-r hover:border-2 hover:text-[#b779d1] align-middle "
@@ -658,11 +682,12 @@ draw draw draw {
             }
             {
               isGameStarted && gameOver && <>
-              <div className="text-3xl font-sans flex flex-col items-center w-[520px] h-[316px] gap-6">
+              <div className="text-3xl font-sans flex flex-col items-center w-[520px] h-[316px] sm:w-[310px] sm:h-[250px] sm:text-xl gap-6">
                 
-                <p >{resultMessage}</p>
+                {/* <p >{resultMessage}</p> */}
+                <p className="text-xl">{resultMessage=='You Won The Game'?"Congratulations":'Better Luck Next Time'}</p>
                 <p ></p>
-                <p ></p>
+                <div ><Image src={`/images/game_win.png`} width={'127px'} height={'116px'}/></div>
                 <button 
                   className="outline-none text-xl p-3 rounded-[12px] bg-violet-900 text-[#ffffff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 mt-4 cursor-pointer bg-gradient-to-r hover:border-2 hover:text-[#b779d1] align-middle "
                   onClick={()=> suffleCards()} >
@@ -675,7 +700,7 @@ draw draw draw {
             }
             {
               !isGameStarted && <>
-              <div className="text-3xl font-sans flex flex-col items-center w-[520px] h-[316px] gap-6">
+              <div className="text-3xl font-sans flex flex-col items-center w-[520px] h-[316px] sm:w-[310px] sm:h-[250px] sm:text-xl gap-6">
                 
                 <p >Share Room ID</p>
                 <p >With</p>

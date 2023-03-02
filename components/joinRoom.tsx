@@ -1,9 +1,9 @@
-import React, {FC, useContext, useEffect, useState } from "react";
+import React, {FC, useContext, useEffect, useState, KeyboardEvent } from "react";
 import styled from "styled-components";
 import gameContext from "../interfaces/warGame";
 import gameService from "../services/gamServices";
 import socketService from "../services/socketServices";
-
+import { toast } from "react-toastify";
 
 const JoinRoomContainer = styled.div`
   width: 100%;
@@ -44,7 +44,7 @@ const JoinButton = styled.button`
   }
 `;
 
-const JoinRoom: FC<{checkRoom:(_value:any)=> void }> = ({checkRoom}) =>  {
+const JoinRoom: FC<{checkRoom:(_value:any)=> void , setGameStarted:(_value:boolean)=> void}> = ({checkRoom, setGameStarted}) =>  {
   const [roomName, setRoomName] = useState("");
   const [isJoining, setJoining] = useState(false);
   const [roomId,setRoomId] = useState<any>()
@@ -70,13 +70,17 @@ const JoinRoom: FC<{checkRoom:(_value:any)=> void }> = ({checkRoom}) =>  {
       // .catch((err: any) => {
       //   alert(err);
       // });
+
+      
       const joined = await gameService
       .joinGameRoom(socket, `${number}`)
+
+
       .catch((err: any) => {
+        toast.error(err)
         return false
       });
-
-
+      
 
       await(500)
       //testing
@@ -87,6 +91,10 @@ const JoinRoom: FC<{checkRoom:(_value:any)=> void }> = ({checkRoom}) =>  {
         await checkRoom(number)
         await setInRoom(true)
       };
+      if(joined?.users == 2) {
+        setGameStarted(true)
+      }
+      
     console.log('in room : ', number)
 
     setJoining(false);
@@ -97,7 +105,7 @@ const JoinRoom: FC<{checkRoom:(_value:any)=> void }> = ({checkRoom}) =>  {
     let number:any = Math.floor((Math.random() * 89999) + 10000);
     setRoomId(number)
     let checker:any = await joinRoom(number)
-    console.log(checker)
+    // console.log(checker)
     if(checker == false) {
       number = Math.floor((Math.random() * 89999) + 10000);
     setRoomId(number)
@@ -115,9 +123,12 @@ const JoinRoom: FC<{checkRoom:(_value:any)=> void }> = ({checkRoom}) =>  {
     }
   }
 
-  useEffect(()=> {
-  })
-// console.log(isInRoom)
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      joinRoom(roomName)
+    }
+  }
+
   return (
     <div className="bg-[#0b0116] text-white bg-opacity-60 border-2 border-zinc-900  p-8 box-border border-solid rounded-xl m-5">
     
@@ -135,7 +146,7 @@ const JoinRoom: FC<{checkRoom:(_value:any)=> void }> = ({checkRoom}) =>  {
         
       </div>
     </form> */}
-    <div className="text-3xl font-sans flex flex-col items-center w-[520px] h-[350px] gap-6">
+    <div className="text-3xl sm:text-xl font-sans flex flex-col items-center w-[520px] h-[350px] sm:w-[310px] sm:h-[300px] gap-6">
       <p className="m-0 font-bold ">Welcome to Card War Game</p>
                 {isJoin == 1 && <>
                 
@@ -146,6 +157,7 @@ const JoinRoom: FC<{checkRoom:(_value:any)=> void }> = ({checkRoom}) =>  {
                     value={roomName}
                     type="text"
                     onChange={(e)=> handleRoomNameChange(e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(e)}
                   />
                 <button 
                   className="outline-none p-3 rounded-[12px] bg-violet-900 text-[#ffffff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 mt-4 cursor-pointer bg-gradient-to-r hover:border-2 hover:text-[#b779d1] align-middle "
