@@ -711,7 +711,7 @@ useEffect(()=> {
         
         
         <div className="flex items-center gap-16 text-white">
-            {isSuffled && 
+            {isSuffled && !gameOver && 
             <><div className="flex flex-col items-center">
                 <p className="m-0 mt-2 text-lg font-sans">{`${yourCard?.suit? yourCard?.suit:''} ${yourCard?.value?yourCard?.value-1:'Card'}`}</p>
                 <div ><Image src={drawnYour?drawnYour:`/images/cards/wait_card.png`} width={'227px'} height={'316px'}/></div>
@@ -742,7 +742,7 @@ useEffect(()=> {
               </>
             }
             {
-              isGameStarted && gameOver && <>
+              isGameStarted && gameOver && !isSuffled && <>
               <div className="text-3xl font-sans flex flex-col items-center w-[520px] h-[316px] sm:w-[310px] sm:h-[300px] sm:text-xl gap-6">
                 
                 {/* <p >{resultMessage}</p> */}
