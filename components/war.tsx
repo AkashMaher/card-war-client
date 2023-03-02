@@ -655,12 +655,12 @@ useEffect(()=> {
             <><div className="flex flex-col items-center">
                 <p className="m-0 mt-2 text-lg font-sans">{`${yourCard?.suit? yourCard?.suit:''} ${yourCard?.value?yourCard?.value-1:'Card'}`}</p>
                 <div ><Image src={drawnYour?drawnYour:`/images/cards/wait_card.png`} width={'227px'} height={'316px'}/></div>
-                <p className="m-0 mt-2 text-lg font-sans">Your Card</p>
+                <p className="m-0 mt-2 text-lg font-sans">You</p>
             </div>
             <div className="flex flex-col items-center">
                 <p className="m-0 mt-2 text-lg font-sans">{`${opponentCard?.suit? opponentCard?.suit:''} ${opponentCard?.value?opponentCard?.value-1:'Card'}`}</p>
                 <div ><Image src={drawnOpponent?drawnOpponent:`/images/cards/wait_card.png`} width={'227px'} height={'316px'}/></div>
-                <p className="m-0 mt-2 text-lg font-sans">Oppnent Card</p>
+                <p className="m-0 mt-2 text-lg font-sans">Opponent</p>
             </div> 
             </>}
             {
