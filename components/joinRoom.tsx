@@ -25,8 +25,9 @@ const JoinRoom: FC<{checkRoom:(_value:any)=> void , setGameStarted:(_value:boole
   const {address, isConnected} = useAccount()
   const handleRoomNameChange = (_roomId:any) => {
     const value = _roomId;
-    console.log(value)
+    // console.log(value)
     setRoomName(value);
+    setRoomId(value);
   };
 
   const {data:getGameInfo} = useQuery([QUERIES.getGame,roomId],()=>
@@ -57,7 +58,9 @@ const JoinRoom: FC<{checkRoom:(_value:any)=> void , setGameStarted:(_value:boole
 
   // console.log(Date.now()/1000)
   const joinRoom = async (number:any) => {
-    const newData = roomData
+    const newData = {
+      address,room_Id:'',host:address
+    }
     
     const socket = socketService.socket;
     if (!socket) return;
@@ -69,6 +72,11 @@ const JoinRoom: FC<{checkRoom:(_value:any)=> void , setGameStarted:(_value:boole
       // .catch((err: any) => {
       //   alert(err);
       // });
+      if(room?.addresses?.player1 == address) return toast.dark("can't play yourself", {
+        type:'error',
+        hideProgressBar:true,
+        autoClose:500
+      }), setJoining(false);
 
       const joined = await gameService
       .joinGameRoom(socket, `${number}`, {walletAddress:address})
@@ -82,22 +90,21 @@ const JoinRoom: FC<{checkRoom:(_value:any)=> void , setGameStarted:(_value:boole
 
       await(500)
       //testing
-      console.log('checking')
-      console.log(joined)
+      // console.log('checking')
+      // console.log(joined)
       
       if (joined) {
         newData['address'] = address
         newData['room_Id'] = `${number}`;
-        newData['host'] = address;
+        // console.log(room)
+      };
+      if(joined && (room?.addresses?.player1 !== address)) {
         await setRoomData(newData)
         await GameData(newData)
-        await setRoom(data?.data?.data)
-      };
-      if(joined) {
         await checkRoom(number)
         await setInRoom(true)
       }
-      if(joined?.users == 2) {
+      if(joined?.users == 2 && (room?.addresses?.player1 !== address)) {
         setGameStarted(true)
       }
       
@@ -166,21 +173,21 @@ const JoinRoom: FC<{checkRoom:(_value:any)=> void , setGameStarted:(_value:boole
                 <button 
                   className="outline-none p-3 rounded-[12px] bg-violet-900 text-[#ffffff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 mt-4 cursor-pointer bg-gradient-to-r hover:border-2 hover:text-[#b779d1] align-middle "
                   onClick={()=> joinRoom(roomName)}  disabled={isJoining}>
-                            {isJoining ? "Creating..." : "Join Room"}
+                            {isJoining ? "Joining..." : "Join Room"}
                 </button>
                 </>}
 
                 {isJoin == 1 || !isJoin && <button 
                   className="outline-none p-3 rounded-[12px] bg-violet-900 text-[#ffffff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 mt-10 cursor-pointer bg-gradient-to-r hover:border-2 hover:text-[#b779d1] align-middle "
                   onClick={()=> handleBtn(1)}  disabled={isJoining}>
-                            {isJoining ? "Creating..." : "Join Room"}
+                            {isJoining ? "Joining..." : "Join Room"}
                 </button>}
 
 
                 {isJoin == 2 || !isJoin && <button 
                   className="outline-none p-3 rounded-[12px] bg-violet-900 text-[#ffffff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 mt-4 cursor-pointer bg-gradient-to-r hover:border-2 hover:text-[#b779d1] align-middle "
                   onClick={()=> handleBtn(2)}  disabled={isJoining}>
-                            {isJoining ? "Creating..." : "Create Room"}
+                            {isJoining ? "Joining..." : "Create Room"}
                 </button> }
                 {/* <div ><Image src={drawnOpponent?drawnOpponent:`/images/cards/wait_card.png`} width={'520px'} height={'316px'}/></div> */}
                 <p className="m-0 mt-2 text-lg font-sans"></p>

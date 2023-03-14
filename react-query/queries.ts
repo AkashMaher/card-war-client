@@ -53,6 +53,6 @@ export const winGame = (data: any) => {
 }
 
 export const getGame = (roomId: string) => {
-  if(roomId == 'NA' || roomId =='') return
+  if(roomId == 'NA' || roomId =='' || roomId == null) return
   return axiosInstance.get(`/get_game/${roomId}`)
 }

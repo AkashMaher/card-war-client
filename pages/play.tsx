@@ -84,8 +84,6 @@ const Home = () => {
     let addresses = getGameInfo?.data?.data?.addresses
     let opaddress = addresses?.player1 == address?addresses?.player2:addresses?.player1
     if(opaddress == '' || opaddress == undefined || opaddress == null) {
-      console.log(opaddress !== null, opaddress !== undefined ,opaddress !== '' )
-      console.log('test',opaddress)
       return await setOpponentWallet(opponentWallet)
     }
     await setOpponentWallet(opaddress)
@@ -183,7 +181,7 @@ const Home = () => {
   //   router.push(`./${_value}`)
   // }
 
-  console.log(opponentWallet)
+  // console.log(opponentWallet)
   return (
 <>
     {/* <HomeVids /> */}
