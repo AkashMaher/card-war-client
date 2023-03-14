@@ -12,72 +12,77 @@ import GameContext, { IWarGameContextProps } from "../interfaces/warGame";
 // import styled from 'styled-components';
 // import { IWarGameContextProps } from '../interfaces/GameInterface';
 import WarGame from '../components/war';
+import { useAccount } from 'wagmi';
+import { useQuery } from 'react-query';
+import { QUERIES } from '../react-query/constants';
+import { getCultNFTs, getTpfNFTs } from '../react-query/queries';
+import useIsMounted from '../utils/hooks/useIsMounted';
 const server = process.env.NEXT_PUBLIC_SERVER || ''
 const Home = () => {
-    
-      const router = useRouter()
+    const isMounted = useIsMounted()
+    const router = useRouter()
+    const { address, isConnected } = useAccount()
+    const [isUserAccess, setUserAccess] = useState(false)
+    const [connectedWallet,setWallet] = useState<any>('NA')
 
-    // const [isUser,setUser] = useState(false)
-    // const [Loading,setLoading] = useState(true)
-    // const [formData, setFormData] = useState(initialFormState)
-    // const [checkIfNewUser,setIfNewUser] = useState(false)
-    const [roomID ,setRoomId] = useState('')
-    const [isInRoom, setInRoom] = useState(false);
-    const [isPlayerTurn, setPlayerTurn] = useState(false);
-    const [isGameStarted, setGameStarted] = useState(false);
-    // const [isSuffled,setIsSuffled] = useState(false)
-    // const [playerPoints,setPlayerpoints] = useState(0)
-    // const [cards, setCards] = useState<any>()
+  const approvedCollections = ['0x61621722798e4370a0d965a5bd1fdd0f527699b1','0x8c3fb10693b228e8b976ff33ce88f97ce2ea9563']
 
-    const checkRoom = (_value:any)=> {
-      if(_value) {
-        setRoomId(_value)
-      }
-    }
-    const connectSocket = async () => {
-    const socket = await socketService
-      .connect(server)
-      .catch((err) => {
-        console.log("Error: ", err);
-      });
-  };
+  const { data:tpfData } = useQuery(
+    [QUERIES.getTpfNFTs, connectedWallet, approvedCollections[1]],
+    () => getTpfNFTs(connectedWallet, approvedCollections[1] )
+  )
 
-  useEffect(() => {
-    connectSocket();
-  }, []);
-
-    const gameContextValue: IWarGameContextProps = {
-      isInRoom,
-      setInRoom,
-      isPlayerTurn,
-      setPlayerTurn,
-      isGameStarted,
-      setGameStarted,
-    };
+  const { data:cultData } = useQuery(
+    [QUERIES.getCultNFTs, connectedWallet, approvedCollections[0]],
+    () => getCultNFTs(connectedWallet, approvedCollections[0] )
+  )
   
-    // console.log(isInRoom)
+  useEffect(()=> {
+    if(tpfData?.data?.assets?.length>0 || cultData?.data?.assets?.length>0){
+      setUserAccess(true)
+    } else {
+      setUserAccess(false)
+    }
+  },[cultData,tpfData])
+
+  useEffect(()=> {
+    setWallet(address)
+  }, [address])
+
   const handleClick = (_value:any)=> {
     if(!_value) return;
     router.push(`./${_value}`)
   }
+
   return (
 <>
+{isMounted &&
+<>
     {/* <HomeVids /> */}
-    <div className=' w-full bg-mainHomePage bg-cover h-screen relative bg-opacity-60'>
-    <GameContext.Provider value={gameContextValue}>
+    <div className=' w-full h-screen relative bg-opacity-60 text-2xl'>
       <div className="container mx-auto text-center ">
-        <div className='pt-2 '>
-          
-        </div>
         
-       <div className="w-[100%] h-[100%] flex align-center-top justify-center">
-          {!isInRoom && <JoinRoom checkRoom={checkRoom} setGameStarted={setGameStarted}/>}
-          {/* {isInRoom && <Game />} */}
-          {isInRoom && <WarGame roomId={roomID} />}
+        <div className='pt-48'>
+          <button onClick={()=> handleClick(!isConnected?"login":"profile")}>{!isConnected?"Connect Wallet":"My Account"}</button>
         </div>
+        {
+          isUserAccess && <>
+          <div >
+            <br></br>
+            <p>The Card War Game</p><br></br>
+            <button onClick={()=> handleClick('play')}>Play Now</button>
+          </div>
+          </>
+        }
+        
+       {/* <div className="w-[100%] h-[100%] flex align-center-top justify-center">
+          {!isInRoom && <JoinRoom checkRoom={checkRoom} setGameStarted={setGameStarted}/>}
+          {isInRoom && <WarGame roomId={roomID} />}
+        </div> */}
       </div>
-    </GameContext.Provider> 
     </div>
+    </>
+    }
     </>
   );
 };

@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import { FC, ReactNode } from 'react'
 // import Footer from './Footer'
 
-// import Header from './Header'
+import Header from './Header'
 // import Detector from './NetworkDetector'
 
 interface LayoutProps {
@@ -27,10 +27,10 @@ const CurrentFooter = () => {
 
 const Layout: FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="flex justify-center bg-gradient-to-r from-dark_mild to-dark_heavy">
-      <div className=" w-full max-w-[1920px] bg-fixed bg-cover bg-market">
+    <div className="flex bg-mainHomePage bg-fixed bg-no-repeat justify-center  ">
+      <div className=" w-full max-w-[1920px] bg-fixed bg-no-repeat bg-cover">
         {/* <Detector /> */}
-        {/* <Header /> */}
+        <Header />
         <Buffer />
         {/* <Loading /> */}
         {children}
