@@ -2,9 +2,9 @@ import { Socket } from "socket.io-client";
 // import { IPlayMatrix, IStartGame } from "../components/game";
 import {IPlayCards, IStartGame, DrawCards} from '../components/war'
 class GameService {
-  public async joinGameRoom(socket: Socket, roomId: string): Promise<any> {
+  public async joinGameRoom(socket: Socket, roomId: string, walletAddress:any): Promise<any> {
     return new Promise((rs, rj) => {
-      socket.emit("join_game", { roomId });
+      socket.emit("join_game", { roomId, walletAddress });
       socket.on("room_joined", (e) => rs(e));
       socket.on("room_join_error", ({ error }) => rj(error));
     });

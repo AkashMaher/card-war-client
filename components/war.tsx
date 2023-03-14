@@ -9,6 +9,11 @@ import useIsMounted from "../utils/hooks/useIsMounted";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import JoinRoom from "./joinRoom";
+import { useMutation } from "react-query";
+import { winGame } from "../react-query/queries";
+import { queryClient } from "../react-query/queryClient";
+import { QUERIES } from "../react-query/constants";
+import { useAccount } from "wagmi";
 class Card {
   value: any;
   suit: any;
@@ -111,6 +116,7 @@ export type IPlayMatrix = Array<Array<string | null>>;
 
 export interface IStartGame {
   start: boolean;
+  opponent:any
 }
 
 export interface IJoinGame {
@@ -132,10 +138,11 @@ export type IPlayCards = {
 export type DrawCards = {
   you:Card, opponent:Card
 }
-const WarGame:FC<{roomId:any}> = ({roomId}) => {
+const WarGame:FC<{roomId:any }> = ({roomId}) => {
    
 //   const [Cards, setCards] = useState<any>({})
   const [points,setPoints] = useState<number>(0)
+  const { address, isConnected } = useAccount()
   const [data, setData] = useState<IPlayCards>()
   const [isSuffled,setIsSuffled] = useState<boolean>(false)
   const [isChecking,setIsChecking] = useState(false)
@@ -156,8 +163,24 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
     isGameStarted,
     setGameStarted,
     isPlayerTurn,
-    setPlayerTurn
+    setPlayerTurn,
+    isInRoom,
+    setInRoom,
+    room,
+    opponentWallet,
+    setOpponentWallet
   } = useContext(gameContext);
+
+
+    const { mutate:WinGame,data:GameWinData, isLoading, isSuccess } = useMutation(
+    winGame,
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(QUERIES.winGame)
+      },
+    }
+  )
+
 
 // console.log('Game is live ?',isGameStarted)
   const suffleCards = async () => {
@@ -206,13 +229,6 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
   };
 
 
-  const updateGameCards = (_player1:any, _player2:any, _points:number) => {
-    const newCards = {_player1,_player2}
-
-    if(newCards._player1.cards.length > 0 || newCards._player2.cards.length > 0) {
-        
-    }
-  }
 
   const checkCard = () => {
     if(opponentCard) {
@@ -444,8 +460,17 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
     // console.log('VALUE OF OPPONENT : ', newData.drawnCards.opponent.value)
     if(!newData.cards.opponent.length || !newData.cards.you.length) {
       let newMessage = !newData.cards.opponent.length?"Opponent Won The Game":"You Won The Game"
+      const newWinData = {
+        room_Id:room?.data?.data?.room_Id,
+       winning_address:!newData.cards.opponent.length?address:opponentWallet,
+      }
+      console.log(newWinData)
+      
       setGameOver(true)
       setIsSuffled(false)
+      if(!GameWinData?.data?.data?.winning_address) {
+        WinGame({...newWinData})
+      }
       if(socketService.socket) {
          return await gameService.gameWin(socketService.socket,newMessage);
       }
@@ -582,11 +607,21 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
         
         
         let result = newData?.cards.you.length == 0?"You Won The Game":newData?.cards.opponent.length == 0?"Opponent Won The Game":''
+
+        
        
         if(!newData?.cards.opponent.length || !newData?.cards.you.length) {
           if(socketService.socket) {
             setGameOver(true)
             setIsSuffled(false)
+            const newWinData = {
+            room_Id:room?.data?.data?.room_Id,
+            winning_address:newData?.cards.opponent.length == 0?address:opponentWallet,
+            }
+            console.log(newWinData)
+            if(!GameWinData?.data?.data?.winning_address) {
+              WinGame({...newWinData})
+            }
             return gameService.gameWin(socketService.socket,result);
           }
         }
@@ -621,11 +656,12 @@ const WarGame:FC<{roomId:any}> = ({roomId}) => {
 
   const handleGameStart = () => {
     if (socketService.socket)
-      gameService.onStartGame(socketService.socket, (options) => {
+      gameService.onStartGame(socketService.socket, async (options) => {
         setGameStarted(true);
-        // console.log(options)
-        // setPlayerSymbol(options.symbol);
-        if (options.start) setPlayerTurn(true);
+        console.log('hello world')
+        console.log(options);
+        setOpponentWallet(options?.opponent?.walletAddress)
+        if (options.start) setPlayerTurn(true)
         else setPlayerTurn(false);
         
       });
@@ -685,6 +721,9 @@ draw draw draw {
 */
 // console.log(gameOver)
 
+function refreshPage(){
+    window.location.reload();
+} 
 const checkOppCard= ()=> {
   if(data?.isYourTurn && opponentCard?.value == 0) {
     setOpponentCard(data?.drawnCards?.opponent)
@@ -701,31 +740,34 @@ useEffect(()=> {
   return (
     <>
     
-   <><div className="flex flex-col items-center justify-between gap-7 p-8 bg-[#0b0116] bg-opacity-60  border-2 border-zinc-900  box-border border-solid rounded-xl m-5">
+   <div className="w-[100%] h-[450px] sm:w-[520px] sm:h-[600px] ">
+   <div className="flex flex-col items-center justify-between gap-2 p-4 bg-[#0b0116] bg-opacity-80  border-2 border-zinc-900  box-border border-solid rounded-xl m-5">
         {/* {isGameStarted && !isSuffled && <button  onClick={()=> suffleCards()}>Suffle Cards</button> } */}
         
-        <><h3 className="text-white m-0 font-bold text-2xl font-sans">{isGameStarted?"A Game of War!":`ROOM ID : ${roomId}`}</h3>
+        <><h3 className="text-white m-0 font-bold text-xl font-sans">{isGameStarted?"A Game of War!":`ROOM ID : ${roomId}`}</h3>
         
-        <h3 className="text-white m-0 font-bold text-2xl font-sans">{isGameStarted?(yourCard?.value>0 && opponentCard?.value>0?resultMessage:!isSuffled?'Joined Lobby':'Waiting For Cards'):''}</h3>
+        <h3 className="text-white m-0 font-semibold text-base font-sans">{isGameStarted?(yourCard?.value>0 && opponentCard?.value>0?resultMessage:!isSuffled?'Joined Lobby':'Waiting For Cards'):''}</h3>
         </>
         
         
-        <div className="flex items-center gap-16 text-white">
+        <div className="flex items-center  gap-16 text-white p-8 pt-8">
             {isSuffled && !gameOver && 
-            <><div className="flex flex-col items-center">
-                <p className="m-0 mt-2 text-lg font-sans">{`${yourCard?.suit? yourCard?.suit:''} ${yourCard?.value?yourCard?.value-1:'Card'}`}</p>
-                <div ><Image src={drawnYour?drawnYour:`/images/cards/wait_card.png`} width={'227px'} height={'316px'}/></div>
-                <p className="m-0 mt-2 text-lg font-sans">You</p>
+            <>
+            <div className="flex flex-col items-center">
+                {/* <p className="m-0 mt-2 font-sans">{`${yourCard?.suit? yourCard?.suit:''} ${yourCard?.value?yourCard?.value-1:'Card'}`}</p> */}
+                <div ><Image src={drawnYour?drawnYour:`/images/cards/wait_card.png`} width={'190px'} height={'250px'}/></div>
+                <p className="m-0 mt-2 text-sm font-sans w-20">{'You'}</p>
             </div>
             <div className="flex flex-col items-center">
-                <p className="m-0 mt-2 text-lg font-sans">{`${opponentCard?.suit? opponentCard?.suit:''} ${opponentCard?.value?opponentCard?.value-1:'Card'}`}</p>
-                <div ><Image src={drawnOpponent?drawnOpponent:`/images/cards/wait_card.png`} width={'227px'} height={'316px'}/></div>
-                <p className="m-0 mt-2 text-lg font-sans">Opponent</p>
+                {/* <p className="m-0 mt-2 font-sans">{`${opponentCard?.suit? opponentCard?.suit:''} ${opponentCard?.value?opponentCard?.value-1:'Card'}`}</p> */}
+                <div ><Image src={drawnOpponent?drawnOpponent:`/images/cards/wait_card.png`} width={'190px'} height={'250px'}/></div>
+                <p className="m-0 mt-2 text-sm font-sans w-20">Opponent</p>
             </div> 
             </>}
             {
-              isGameStarted && !isSuffled && !gameOver && <>
-              <div className="text-2xl font-bold font-sans flex flex-col items-center w-[520px] h-[316px] sm:w-[310px] sm:h-[300px] sm:text-xl gap-5">
+              isGameStarted && !isSuffled && !gameOver && 
+              <>
+              <div className="text-lg font-bold font-sans flex flex-col items-center sm:w-[520px] sm:h-[316px] w-[310px] h-[300px] sm:text-xl gap-5">
                 
                 <p >Suffle Cards to Start Game</p>
                 <p ></p>
@@ -743,7 +785,7 @@ useEffect(()=> {
             }
             {
               isGameStarted && gameOver && !isSuffled && <>
-              <div className="text-3xl font-sans flex flex-col items-center w-[520px] h-[316px] sm:w-[310px] sm:h-[300px] sm:text-xl gap-6">
+              <div className="text-3xl font-sans flex flex-col items-center sm:w-[520px] sm:h-[316px] w-[310px] h-[300px] sm:text-xl gap-6">
                 
                 {/* <p >{resultMessage}</p> */}
                 <p className="text-xl">{resultMessage=='You Won The Game'?"Congratulations":'Better Luck Next Time'}</p>
@@ -751,7 +793,7 @@ useEffect(()=> {
                 <div ><Image src={`/images/game_win.png`} width={'127px'} height={'116px'}/></div>
                 <button 
                   className="outline-none text-xl p-3 rounded-[12px] bg-violet-900 text-[#ffffff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 mt-4 cursor-pointer bg-gradient-to-r hover:border-2 hover:text-[#b779d1] align-middle "
-                  onClick={()=> suffleCards()} >
+                  onClick={()=> refreshPage()} >
                             {"Play Again"}
                 </button>
                 {/* <div ><Image src={drawnOpponent?drawnOpponent:`/images/cards/wait_card.png`} width={'520px'} height={'316px'}/></div> */}
@@ -761,7 +803,7 @@ useEffect(()=> {
             }
             {
               !isGameStarted && <>
-              <div className="text-3xl font-sans flex flex-col items-center w-[520px] h-[316px] sm:w-[310px] sm:h-[250px] sm:text-xl gap-6">
+              <div className="text-3xl font-sans flex flex-col items-center sm:w-[520px] sm:h-[316px] w-[310px] h-[300px] sm:text-xl gap-6">
                 
                 <p >Share Room ID</p>
                 <p >With</p>
@@ -781,14 +823,14 @@ useEffect(()=> {
         {/* <p className="text-white m-0 text-2xl font-mono font-bold ">Remaining Cards<span id="remainingCards"> 52</span></p> */}
         {/* <button onClick={()=> DrawYourCard()}>Draw</button> */}
         
-           {isGameStarted && !gameOver && isSuffled && <button className="outline-none p-3 rounded-[12px] bg-violet-900 text-[#fff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 cursor-pointer  hover:border-2 hover:text-[#bee2ef] " 
+           {isGameStarted && !gameOver && isSuffled && <button className="outline-none text-sm sm:text-base p-1 sm:p-3 rounded-[12px] bg-violet-900 text-[#fff] border-transparent border-solid border-0.5 border-r-1 px-2 py-18 cursor-pointer  hover:border-1 hover:text-[#bee2ef] " 
            onClick={()=>  (!isSuffled ?suffleCards(): DrawYourCard())} disabled={!data?.isYourTurn}>
             {(!isSuffled?"Suffle Cards":"Draw Card")}
             </button>
             }
-         {isSuffled &&<p className="text-white">Remaining Cards : You = {data?.cards?.you.length} , Opponent = {data?.cards?.opponent.length}</p>}
+         {isSuffled &&<p className="text-white text-xs md:text-base">Remaining Cards : You = {data?.cards?.you.length} , Opponent = {data?.cards?.opponent.length}</p>}
     </div>
-    </>
+    </div>
     </>
   );
 }
