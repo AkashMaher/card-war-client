@@ -15,7 +15,7 @@ import WarGame from '../components/war';
 import { useAccount } from 'wagmi';
 import { useQuery } from 'react-query';
 import { QUERIES } from '../react-query/constants';
-import { getCultNFTs, getTpfNFTs } from '../react-query/queries';
+import { getCultNFTs, getSquishiverseNFTs, getTpfNFTs } from '../react-query/queries';
 import useIsMounted from '../utils/hooks/useIsMounted';
 const server = process.env.NEXT_PUBLIC_SERVER || ''
 const Home = () => {
@@ -25,11 +25,11 @@ const Home = () => {
     const [isUserAccess, setUserAccess] = useState(false)
     const [connectedWallet,setWallet] = useState<any>('NA')
 
-  const approvedCollections = ['0x61621722798e4370a0d965a5bd1fdd0f527699b1','0x8c3fb10693b228e8b976ff33ce88f97ce2ea9563']
+  const approvedCollections = ['0x61621722798e4370a0d965a5bd1fdd0f527699b1','0x8c3fb10693b228e8b976ff33ce88f97ce2ea9563', '0xbe0e87fa5bcb163b614ba1853668ffcd39d18fcb','0xc527ede68f14a4a52c32a1264cc02fb5ea6bb56d']
 
   const { data:tpfData } = useQuery(
     [QUERIES.getTpfNFTs, connectedWallet, approvedCollections[1]],
-    () => getTpfNFTs(connectedWallet, approvedCollections[1] )
+    () => getTpfNFTs(connectedWallet, approvedCollections[1], approvedCollections[2] )
   )
 
   const { data:cultData } = useQuery(
@@ -37,13 +37,17 @@ const Home = () => {
     () => getCultNFTs(connectedWallet, approvedCollections[0] )
   )
   
+    const { data:SquishiverseData } = useQuery(
+    [QUERIES.getSquishiverseNFTs, connectedWallet, approvedCollections[3]],
+    () => getSquishiverseNFTs(connectedWallet, approvedCollections[3] )
+  )
   useEffect(()=> {
-    if(tpfData?.data?.assets?.length>0 || cultData?.data?.assets?.length>0){
+    if(tpfData?.data?.assets?.length>0 || cultData?.data?.assets?.length>0 || SquishiverseData?.data?.assets?.length>0){
       setUserAccess(true)
     } else {
       setUserAccess(false)
     }
-  },[cultData,tpfData])
+  },[cultData,tpfData, SquishiverseData])
 
   useEffect(()=> {
     setWallet(address)

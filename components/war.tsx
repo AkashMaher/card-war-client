@@ -746,7 +746,7 @@ useEffect(()=> {
         
         <><h3 className="text-white m-0 font-bold text-xl font-sans">{isGameStarted?"A Game of War!":`ROOM ID : ${roomId}`}</h3>
         
-        <h3 className="text-white m-0 font-semibold text-base font-sans">{isGameStarted?(yourCard?.value>0 && opponentCard?.value>0?resultMessage:!isSuffled?'Joined Lobby':'Waiting For Cards'):''}</h3>
+        <h3 className="text-white m-0 font-semibold text-base font-sans">{isGameStarted?(yourCard?.value>0 && opponentCard?.value>0?resultMessage:!isSuffled?'Joined Lobby':(data?.isYourTurn?"Your Turn":'Opponnet Turn')):''}</h3>
         </>
         
         

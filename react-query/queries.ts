@@ -9,6 +9,17 @@ const axiosFileInstance = createAxiosInstance('form-data')
 
 export const getTpfNFTs = (
   ownerAddress:any,
+  asset_contract_address:string,
+  asset_contract_address_staked:string
+) => {
+  if(ownerAddress == 'NA') return
+  return Instance.get(
+    `https://api.opensea.io/api/v1/assets?owner=${ownerAddress}&asset_contract_addresses=${asset_contract_address}&asset_contract_addresses=${asset_contract_address_staked}`
+  )
+}
+
+export const getSquishiverseNFTs = (
+  ownerAddress:any,
   asset_contract_addresse:string
 ) => {
   if(ownerAddress == 'NA') return

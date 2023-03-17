@@ -6,5 +6,6 @@ export const QUERIES = {
   getOpponent:'getOpponent',
   getGame:'getGame',
   winGame:'winGame',
-  updateGame:'updateGame'
+  updateGame:'updateGame',
+  getSquishiverseNFTs:'getSquishiverseNFTs'
 }

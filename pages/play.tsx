@@ -9,7 +9,7 @@ import WarGame from '../components/war';
 import Player from '../components/player';
 import { useAccount, useConnect, useDisconnect,useSwitchNetwork,useNetwork, chainId } from 'wagmi'
 import useIsMounted from '../utils/hooks/useIsMounted'
-import { createUser, getCultNFTs, getGame, getOpponent, getTpfNFTs, getUser } from '../react-query/queries'
+import { createUser, getCultNFTs, getGame, getOpponent, getSquishiverseNFTs, getTpfNFTs, getUser } from '../react-query/queries'
 import { QUERIES } from '../react-query/constants'
 import { useMutation, useQuery } from 'react-query'
 import { queryClient } from '../react-query/queryClient'
@@ -63,17 +63,22 @@ const Home = () => {
     const [roomData, setRoomData] = useState<GameRoom>(initialRoomData)
     const [UserDataSuccess,setUserDataSuccess] = useState(false)
     const [room, setRoom] = useState<any>()
-    const approvedCollections = ['0x61621722798e4370a0d965a5bd1fdd0f527699b1','0x8c3fb10693b228e8b976ff33ce88f97ce2ea9563']
+  const approvedCollections = ['0x61621722798e4370a0d965a5bd1fdd0f527699b1','0x8c3fb10693b228e8b976ff33ce88f97ce2ea9563', '0xbe0e87fa5bcb163b614ba1853668ffcd39d18fcb','0xc527ede68f14a4a52c32a1264cc02fb5ea6bb56d']
 
-    const { data:tpfData } = useQuery(
-      [QUERIES.getTpfNFTs, connectedWallet, approvedCollections[1]],
-      () => getTpfNFTs(connectedWallet, approvedCollections[1] )
-    )
+  const { data:tpfData } = useQuery(
+    [QUERIES.getTpfNFTs, connectedWallet, approvedCollections[1]],
+    () => getTpfNFTs(connectedWallet, approvedCollections[1], approvedCollections[2] )
+  )
 
-    const { data:cultData } = useQuery(
-      [QUERIES.getCultNFTs, connectedWallet, approvedCollections[0]],
-      () => getCultNFTs(connectedWallet, approvedCollections[0] )
-    )
+  const { data:cultData } = useQuery(
+    [QUERIES.getCultNFTs, connectedWallet, approvedCollections[0]],
+    () => getCultNFTs(connectedWallet, approvedCollections[0] )
+  )
+  
+    const { data:SquishiverseData } = useQuery(
+    [QUERIES.getSquishiverseNFTs, connectedWallet, approvedCollections[3]],
+    () => getSquishiverseNFTs(connectedWallet, approvedCollections[3] )
+  )
   
 
     const {data:getGameInfo} = useQuery([QUERIES.getGame,roomData?.room_Id],()=>
@@ -94,13 +99,13 @@ const Home = () => {
     checkOpponent()
   })
   useEffect(()=> {
-    if(tpfData?.data?.assets?.length>0 || cultData?.data?.assets?.length>0){
+    if(tpfData?.data?.assets?.length>0 || cultData?.data?.assets?.length>0 || SquishiverseData?.data?.assets?.length>0){
       setIsAccess(true)
     } else {
       setIsAccess(false)
       // setIsAccess(true)
     }
-  },[cultData,tpfData, isMounted])
+  },[cultData,tpfData, isMounted, SquishiverseData])
 
   useEffect(()=> {
     setWallet(address)
@@ -125,7 +130,6 @@ const Home = () => {
     () => getOpponent(opponentWallet)
   )
   
-
   useEffect(()=> {
     setOpponent(OpponentData?.data?.data)
   }, [OpponentData, opponent])
