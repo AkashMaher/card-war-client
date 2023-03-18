@@ -233,13 +233,13 @@ const WarGame:FC<{roomId:any }> = ({roomId}) => {
   const checkCard = () => {
     if(opponentCard) {
       let name = opponentCard.suit.toLowerCase()
-      let value = opponentCard.value-1
+      let value = opponentCard.value
       // console.log(value)
       setdrawnOpponent(opponentCard.value>0?`/images/cards/${name}_${value}.png`:`/images/cards/wait_card.png`)
     }
     if(yourCard) {
       let name = yourCard.suit.toLowerCase()
-      let value = yourCard.value-1
+      let value = yourCard.value
       // console.log(value)
       if(value>0) {
         setdrawnYour(`/images/cards/${name}_${value}.png`)
@@ -253,13 +253,13 @@ const WarGame:FC<{roomId:any }> = ({roomId}) => {
     // checkCard()
     if(opponentCard) {
       let name = opponentCard.suit.toLowerCase()
-      let value = opponentCard.value-1
+      let value = opponentCard.value
 
       setdrawnOpponent(opponentCard.value>0?`/images/cards/${name}_${value}.png`:`/images/cards/wait_card.png`)
     }
     if(yourCard) {
       let name = yourCard.suit.toLowerCase()
-      let value = yourCard.value-1
+      let value = yourCard.value
 
       setdrawnYour(yourCard.value>0?`/images/cards/${name}_${value}.png`:`/images/cards/wait_card.png`)
     }
@@ -278,6 +278,8 @@ const WarGame:FC<{roomId:any }> = ({roomId}) => {
     } 
     
     const card:any = newData.cards.you.pop()
+
+    console.log(card)
 
     // if(newData?.drawnCards.opponent.value == 0) {
       setYourCard(card)
@@ -484,7 +486,7 @@ const WarGame:FC<{roomId:any }> = ({roomId}) => {
     
     if(newData?.drawnCards.opponent.value > newData?.drawnCards.you.value && !newData.isWar) {
       console.log("Value of opponent card is more")
-      setResult('Oppnent Won the round')
+      setResult('Opponent Won the round')
       await newData.cards.opponent.unshift(newData?.drawnCards.opponent);
       // await newData.cards.opponent.unshift(newData?.drawnCards.you);
 
@@ -746,7 +748,7 @@ useEffect(()=> {
         
         <><h3 className="text-white m-0 font-bold text-xl font-sans">{isGameStarted?"A Game of War!":`ROOM ID : ${roomId}`}</h3>
         
-        <h3 className="text-white m-0 font-semibold text-base font-sans">{isGameStarted?(yourCard?.value>0 && opponentCard?.value>0?resultMessage:!isSuffled?'Joined Lobby':(data?.isYourTurn?"Your Turn":'Opponnet Turn')):''}</h3>
+        <h3 className="text-white m-0 font-semibold text-base font-sans">{isGameStarted?(yourCard?.value>0 && opponentCard?.value>0?resultMessage:!isSuffled?'Joined Lobby':(data?.isYourTurn?"Your Turn":'Opponent Turn')):''}</h3>
         </>
         
         
