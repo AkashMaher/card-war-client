@@ -102,8 +102,8 @@ const Home = () => {
     if(tpfData?.data?.assets?.length>0 || cultData?.data?.assets?.length>0 || SquishiverseData?.data?.assets?.length>0){
       setIsAccess(true)
     } else {
-      // setIsAccess(false)
-      setIsAccess(true)
+      setIsAccess(false)
+      // setIsAccess(true)
     }
   },[cultData,tpfData, isMounted, SquishiverseData])
 
