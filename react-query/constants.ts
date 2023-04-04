@@ -7,5 +7,6 @@ export const QUERIES = {
   getGame:'getGame',
   winGame:'winGame',
   updateGame:'updateGame',
-  getSquishiverseNFTs:'getSquishiverseNFTs'
+  getSquishiverseNFTs:'getSquishiverseNFTs',
+  getMFNFTs:'getMFNFTs'
 }

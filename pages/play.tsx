@@ -9,7 +9,7 @@ import WarGame from '../components/war';
 import Player from '../components/player';
 import { useAccount, useConnect, useDisconnect,useSwitchNetwork,useNetwork, chainId } from 'wagmi'
 import useIsMounted from '../utils/hooks/useIsMounted'
-import { createUser, getCultNFTs, getGame, getOpponent, getSquishiverseNFTs, getTpfNFTs, getUser } from '../react-query/queries'
+import { createUser, getCultNFTs, getGame, getMFNFTs, getOpponent, getSquishiverseNFTs, getTpfNFTs, getUser } from '../react-query/queries'
 import { QUERIES } from '../react-query/constants'
 import { useMutation, useQuery } from 'react-query'
 import { queryClient } from '../react-query/queryClient'
@@ -63,7 +63,7 @@ const Home = () => {
     const [roomData, setRoomData] = useState<GameRoom>(initialRoomData)
     const [UserDataSuccess,setUserDataSuccess] = useState(false)
     const [room, setRoom] = useState<any>()
-  const approvedCollections = ['0x61621722798e4370a0d965a5bd1fdd0f527699b1','0x8c3fb10693b228e8b976ff33ce88f97ce2ea9563', '0xbe0e87fa5bcb163b614ba1853668ffcd39d18fcb','0xc527ede68f14a4a52c32a1264cc02fb5ea6bb56d']
+  const approvedCollections = ['0x61621722798e4370a0d965a5bd1fdd0f527699b1','0x8c3fb10693b228e8b976ff33ce88f97ce2ea9563', '0xbe0e87fa5bcb163b614ba1853668ffcd39d18fcb','0xc527ede68f14a4a52c32a1264cc02fb5ea6bb56d','0x5b80a9383ea914ad8eed822a5db1bd330baf2f6b']
 
   const { data:tpfData } = useQuery(
     [QUERIES.getTpfNFTs, connectedWallet, approvedCollections[1]],
@@ -80,6 +80,10 @@ const Home = () => {
     () => getSquishiverseNFTs(connectedWallet, approvedCollections[3] )
   )
   
+    const { data:MFData } = useQuery(
+    [QUERIES.getMFNFTs, address, approvedCollections[0]],
+    () => getMFNFTs(address, approvedCollections[4] )
+  )
 
     const {data:getGameInfo} = useQuery([QUERIES.getGame,roomData?.room_Id],()=>
     getGame(roomData?.room_Id)
@@ -99,13 +103,13 @@ const Home = () => {
     checkOpponent()
   })
   useEffect(()=> {
-    if(tpfData?.data?.assets?.length>0 || cultData?.data?.assets?.length>0 || SquishiverseData?.data?.assets?.length>0){
+    if(tpfData?.data?.assets?.length>0 || cultData?.data?.assets?.length>0 || SquishiverseData?.data?.assets?.length>0 || MFData?.data?.assets?.length>0){
       setIsAccess(true)
     } else {
       setIsAccess(false)
       // setIsAccess(true)
     }
-  },[cultData,tpfData, isMounted, SquishiverseData])
+  },[cultData,tpfData, isMounted, SquishiverseData, MFData])
 
   useEffect(()=> {
     setWallet(address)

@@ -10,7 +10,7 @@ import { add } from 'date-fns'
 import { opacityAnimation } from '../utils/animations'
 import Head from 'next/head';
 import { QUERIES } from '../react-query/constants'
-import {  getUser, createUser, getTpfNFTs, getCultNFTs, getSquishiverseNFTs} from '../react-query/queries'
+import {  getUser, createUser, getTpfNFTs, getCultNFTs, getSquishiverseNFTs, getMFNFTs} from '../react-query/queries'
 import { useMutation, useQuery } from 'react-query'
 import useIsMounted from '../utils/hooks/useIsMounted'
 import { handleAnimationDelay } from '../utils'
@@ -38,10 +38,11 @@ const { width } = useWindowDimensions()
   const [culdAssets,setculdAssets] = useState<any[]>([])
   const [TPFAssets,setTPFAssets] = useState<any[]>([])
   const [SquishiAssets,setSquishiAssets] = useState<any[]>([])
+  const [MFAssets,setMFAssets] = useState<any[]>([])
   const [pfp, setPfp] = useState<any>()
   const [editable,setEditable] = useState(false)
   const [hide,setHidden] = useState('hidden')
-  const approvedCollections = ['0x61621722798e4370a0d965a5bd1fdd0f527699b1','0x8c3fb10693b228e8b976ff33ce88f97ce2ea9563', '0xbe0e87fa5bcb163b614ba1853668ffcd39d18fcb','0xc527ede68f14a4a52c32a1264cc02fb5ea6bb56d']
+  const approvedCollections = ['0x61621722798e4370a0d965a5bd1fdd0f527699b1','0x8c3fb10693b228e8b976ff33ce88f97ce2ea9563', '0xbe0e87fa5bcb163b614ba1853668ffcd39d18fcb','0xc527ede68f14a4a52c32a1264cc02fb5ea6bb56d','0x5b80a9383ea914ad8eed822a5db1bd330baf2f6b']
 
   const { data:tpfData } = useQuery(
     [QUERIES.getTpfNFTs, address, approvedCollections[1]],
@@ -58,10 +59,16 @@ const { width } = useWindowDimensions()
     () => getSquishiverseNFTs(address, approvedCollections[3] )
   )
 
+    const { data:getMFData } = useQuery(
+    [QUERIES.getMFNFTs, address, approvedCollections[0]],
+    () => getMFNFTs(address, approvedCollections[4] )
+  )
+
   useEffect(()=> {
     setculdAssets(cultData?.data?.assets)
     setTPFAssets(tpfData?.data?.assets)
     setSquishiAssets(SquishiverseData?.data?.assets)
+    setMFAssets(getMFData?.data?.assets)
     if(tpfData?.data.assets?.length>0 && !pfp) {
       setPfp(tpfData?.data?.assets?.[0].image_url)
     }
@@ -71,7 +78,7 @@ const { width } = useWindowDimensions()
       setPfp(cultData?.data?.assets?.[0].image_url)
     }
     
-  },[cultData, tpfData, pfp,userInfo, SquishiverseData])
+  },[cultData, tpfData, pfp,userInfo, SquishiverseData, getMFData])
 
 
 
@@ -172,6 +179,44 @@ const { data:UserData } = useQuery(
             >
               <h2 className='text-3xl  font-semibold text-center '>User NFTs</h2>
             </motion.div>
+        {MFAssets?.length > 0 &&<motion.div
+              className="mt-8 bg-orange-100 bg-opacity-[10%]"
+              variants={opacityAnimation}
+              initial="initial"
+              whileInView="final"
+              viewport={{ once: true }}
+              transition={{
+                ease: 'easeInOut',
+                duration: 1,
+                delay: 0.4,
+              }}
+            >
+        <p className='text-2xl pl-12 pt-5'>Movin Frens</p>
+       <div
+              className="py-10 md:px-4 bg-transparent rounded-lg grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 sm:grid-cols-3  
+          gap-20 w-full  max-w-full mx-auto px-10"
+            >
+              {MFAssets?.length == 0 && <p>No Assets Found</p>}
+              {MFAssets?.length>0 &&
+                MFAssets?.map((nft, index) => (
+                  <motion.div
+                    className="flex justify-center "
+                    key={index}
+                    variants={opacityAnimation}
+                    initial="initial"
+                    whileInView="final"
+                    viewport={{ once: true }}
+                    transition={{
+                      ease: 'easeInOut',
+                      duration: 0.6,
+                      delay: handleAnimationDelay(index, width),
+                    }}
+                  >
+                    <NFTView nft={nft} />
+                  </motion.div>
+                ))}
+            </div>
+       </motion.div>}
        {TPFAssets?.length > 0 &&<motion.div
               className="mt-8 bg-orange-100 bg-opacity-[10%]"
               variants={opacityAnimation}
