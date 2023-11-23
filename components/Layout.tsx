@@ -17,13 +17,6 @@ const Buffer = () => {
   return <div className="bg-transparent w-full h-[100px]"></div>
 }
 
-const CurrentFooter = () => {
-  const router = useRouter()
-  if (router.asPath === '/') {
-    return null
-  }
-  // return <Footer />
-}
 
 const Layout: FC<LayoutProps> = ({ children }) => {
   return (

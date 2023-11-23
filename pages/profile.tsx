@@ -1,131 +1,114 @@
 /* eslint-disable jsx-a11y/alt-text */
-import { motion } from 'framer-motion'
-import { ethers } from 'ethers'
-import { NextPage } from 'next'
-import { useRouter } from 'next/router'
-import { useEffect, useLayoutEffect, useState } from 'react'
-import { useAccount, useConnect, useDisconnect,useSwitchNetwork,useNetwork, chainId } from 'wagmi'
-import { InjectedConnector } from 'wagmi/connectors/injected'
-import { add } from 'date-fns'
-import { opacityAnimation } from '../utils/animations'
-import Head from 'next/head';
-import { QUERIES } from '../react-query/constants'
-import {  getUser, createUser, getTpfNFTs, getCultNFTs, getSquishiverseNFTs, getMFNFTs} from '../react-query/queries'
-import { useMutation, useQuery } from 'react-query'
-import useIsMounted from '../utils/hooks/useIsMounted'
-import { handleAnimationDelay } from '../utils'
-import useWindowDimensions from '../utils/hooks/useWindowDimensions'
-import NFTView from '../components/NftView'
+import { motion } from "framer-motion";
+import { NextPage } from "next";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { useAccount, useSwitchNetwork, useNetwork } from "wagmi";
+import { opacityAnimation } from "../utils/animations";
+import Head from "next/head";
+import { QUERIES } from "../react-query/constants";
+import { getUser, createUser, getUserNfts } from "../react-query/queries";
+import { useMutation, useQuery } from "react-query";
+import useIsMounted from "../utils/hooks/useIsMounted";
+import { handleAnimationDelay } from "../utils";
+import useWindowDimensions from "../utils/hooks/useWindowDimensions";
+import NFTView from "../components/NftView";
 import Image from "next/image";
-import { queryClient } from '../react-query/queryClient'
+import { queryClient } from "../react-query/queryClient";
+import Collection from "../components/Collection";
 const AccountPage: NextPage = () => {
+  const intialUser = {
+    user_name: "",
+    user_id: "0",
+    image:
+      "https://i.seadn.io/gae/A75MNKwJ5tw7R6t0-2DMcdDqr0ekHIfbDSrGFUgKNg_uwTuzbkin3jCKjph87jgQYq1wkmXd7gZazIrbrTIZ2DEl3upvLe-Bok0u?w=500&auto=format",
+  };
 
-const intialUser = {
-    name:'Akash',
-    user_id:'0',
-    image:'https://i.seadn.io/gae/A75MNKwJ5tw7R6t0-2DMcdDqr0ekHIfbDSrGFUgKNg_uwTuzbkin3jCKjph87jgQYq1wkmXd7gZazIrbrTIZ2DEl3upvLe-Bok0u?w=500&auto=format'
-}
+  const defaultImage = "/images/default.jpg";
+  const isMounted = useIsMounted();
+  const { address, isConnected } = useAccount();
+  const router = useRouter();
+  const [userInfo, setUserInfo] = useState<any>(intialUser);
+  const [Loading, setLoading] = useState(true);
+  const { chain } = useNetwork();
+  const { width } = useWindowDimensions();
+  const { switchNetwork } = useSwitchNetwork();
+  const [culdAssets, setculdAssets] = useState<any[]>([]);
+  const [TPFAssets, setTPFAssets] = useState<any[]>([]);
+  const [SquishiAssets, setSquishiAssets] = useState<any[]>([]);
+  const [MFAssets, setMFAssets] = useState<any[]>([]);
+  const [pfp, setPfp] = useState<any>();
+  const [isNewUser, setIsNewUser] = useState(false);
+  const [editable, setEditable] = useState(false);
+  const [hide, setHidden] = useState("hidden");
 
-const defaultImage = '/images/default.jpg'
-const isMounted = useIsMounted()
-  const { address, isConnected } = useAccount()
-  const router = useRouter()
-  const [userInfo,setUserInfo] = useState<any>(intialUser)
-  const [Loading,setLoading] = useState(true)
-  const { chain } = useNetwork()
-const { width } = useWindowDimensions()
-  const { switchNetwork } = useSwitchNetwork()
-  const [culdAssets,setculdAssets] = useState<any[]>([])
-  const [TPFAssets,setTPFAssets] = useState<any[]>([])
-  const [SquishiAssets,setSquishiAssets] = useState<any[]>([])
-  const [MFAssets,setMFAssets] = useState<any[]>([])
-  const [pfp, setPfp] = useState<any>()
-  const [editable,setEditable] = useState(false)
-  const [hide,setHidden] = useState('hidden')
-  const approvedCollections = ['0x61621722798e4370a0d965a5bd1fdd0f527699b1','0x8c3fb10693b228e8b976ff33ce88f97ce2ea9563', '0xbe0e87fa5bcb163b614ba1853668ffcd39d18fcb','0xc527ede68f14a4a52c32a1264cc02fb5ea6bb56d','0x5b80a9383ea914ad8eed822a5db1bd330baf2f6b']
+  const { data: user_nfts } = useQuery([QUERIES.get_user_nfts, address], () =>
+    getUserNfts(address)
+  );
 
-  const { data:tpfData } = useQuery(
-    [QUERIES.getTpfNFTs, address, approvedCollections[1]],
-    () => getTpfNFTs(address, approvedCollections[1], approvedCollections[2] )
-  )
+  // useEffect(() => {
+  //   if (user_nfts?.access) {
+  //     setUserAccess(true);
+  //   } else {
+  //     setUserAccess(false);
+  //   }
+  // }, [user_nfts]);
 
-  const { data:cultData } = useQuery(
-    [QUERIES.getCultNFTs, address, approvedCollections[0]],
-    () => getCultNFTs(address, approvedCollections[0] )
-  )
-  
-    const { data:SquishiverseData } = useQuery(
-    [QUERIES.getSquishiverseNFTs, address, approvedCollections[3]],
-    () => getSquishiverseNFTs(address, approvedCollections[3] )
-  )
-
-    const { data:getMFData } = useQuery(
-    [QUERIES.getMFNFTs, address, approvedCollections[0]],
-    () => getMFNFTs(address, approvedCollections[4] )
-  )
-
-  useEffect(()=> {
-    setculdAssets(cultData?.data?.assets)
-    setTPFAssets(tpfData?.data?.assets)
-    setSquishiAssets(SquishiverseData?.data?.assets)
-    setMFAssets(getMFData?.data?.assets)
-    if(tpfData?.data.assets?.length>0 && !pfp) {
-      setPfp(tpfData?.data?.assets?.[0].image_url)
+  useEffect(() => {
+    setculdAssets(user_nfts?.data?.the_cult_dao);
+    setTPFAssets(user_nfts?.data?.the_plague);
+    setSquishiAssets(user_nfts?.data?.squishiverse);
+    setMFAssets(user_nfts?.data?.movinfrens);
+    if (user_nfts?.data?.the_plague?.length > 0 && !pfp) {
+      setPfp(user_nfts?.data?.the_plague?.[0].image_url);
+    } else if (user_nfts?.data?.squishiverse?.length > 0 && !pfp) {
+      setPfp(user_nfts?.data?.squishiverse?.[0].image_url);
+    } else if (user_nfts?.data?.the_cult_dao?.length > 0 && !pfp) {
+      setPfp(user_nfts?.data?.the_cult_dao?.[0].image_url);
     }
-    else if(SquishiverseData?.data?.assets?.length>0 && !pfp) {
-      setPfp(SquishiverseData?.data?.assets?.[0].image_url)
-    } else if(cultData?.data.assets?.length>0 && !pfp) {
-      setPfp(cultData?.data?.assets?.[0].image_url)
-    }
-    
-  },[cultData, tpfData, pfp,userInfo, SquishiverseData, getMFData])
+  }, [pfp, user_nfts]);
 
-
-
-const { data:UserData } = useQuery(
+  const { data: UserData, isFetched } = useQuery(
     [QUERIES.getUser, address],
     () => getUser(address)
-    
-  )
+  );
 
-  useEffect(()=> {
-    if(!isConnected && !address) {
-      router.push('/login')
+  useEffect(() => {
+    if (!isConnected && !address) {
+      router.push("/login");
     }
-  })
+  });
 
-  useEffect(()=> {
-    setUserInfo(UserData?.data?.data)
-  }, [UserData])
-
-
-  const { mutate:createData, data, isLoading, isSuccess } = useMutation(
-    createUser,
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(QUERIES.createUser)
-      },
+  useEffect(() => {
+    if (isFetched && UserData?.success === true) {
+      setUserInfo(UserData?.data);
+    } else if (isFetched && UserData?.success === false) {
+      setIsNewUser(true);
     }
-  )
+  }, [UserData, isFetched]);
 
-  useEffect(()=> {
-    if(userInfo?.image =='' || userInfo?.image == null) {
-    createData({name:userInfo?.user_name,wallet_address:address,image:pfp})
+  const { mutate: createData } = useMutation(createUser, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(QUERIES.createUser);
+    },
+  });
+
+  useEffect(() => {
+    if (isNewUser === true || !userInfo?.image || userInfo?.image == "") {
+      createData({ wallet_address: address, image: pfp });
     }
-  },[address, createData, pfp, userInfo])
+  }, [address, createData, isNewUser, pfp, userInfo]);
 
-
-
-    useEffect(()=> {
-      if (window.ethereum) {
-        (window as any).ethereum.on('accountsChanged', function (accounts:any) {
-          setUserInfo([]);
-          setLoading(true);
+  useEffect(() => {
+    if (window.ethereum) {
+      (window as any).ethereum.on("accountsChanged", function (accounts: any) {
+        setUserInfo([]);
+        setLoading(true);
         //   checkUser();
-          return;
-        })
-      }
-    })
+        return;
+      });
+    }
+  });
 
   return (
     <div>
@@ -133,210 +116,78 @@ const { data:UserData } = useQuery(
         <title id="title">My Account</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-    <>
-    <main className="p-4 pt-6 lg:px-16 min-h-screen">
-       {isMounted && 
-       <>
-       
-       <motion.div
-              className="mt-8 text-center gap-3"
-              variants={opacityAnimation}
-              initial="initial"
-              whileInView="final"
-              viewport={{ once: true }}
-              transition={{
-                ease: 'easeInOut',
-                duration: 1,
-                delay: 0.4,
-              }}
-            >
-       <div className='text-center gap-5'>
-        {/* <h1 className="text-2xl font-bold text-center bg-[#63f7f5] bg-opacity-10">Account Info</h1> */}
-        <br></br>
-        <div className="relative justify-center flex gap-20 sm:gap-48">
-          <div className="relative w-24 h-24">
-            <Image className="rounded-full border border-gray-100 shadow-sm" src={userInfo?.image?userInfo?.image:defaultImage} objectFit="fill" layout="fill"/>
-          </div>
-        </div>
-          <div className='pt-8 text-xl' >
-          <ul>
-              <li className={`outline-0 inline-block`}>{userInfo?.user_name?userInfo?.user_name:''}</li> 
-          </ul>
-          </div>
-        </div>
-       </motion.div>
-       <motion.div
-              className="mt-8"
-              variants={opacityAnimation}
-              initial="initial"
-              whileInView="final"
-              viewport={{ once: true }}
-              transition={{
-                ease: 'easeInOut',
-                duration: 1,
-                delay: 0.4,
-              }}
-            >
-              <h2 className='text-3xl  font-semibold text-center '>User NFTs</h2>
-            </motion.div>
-        {MFAssets?.length > 0 &&<motion.div
-              className="mt-8 bg-orange-100 bg-opacity-[10%]"
-              variants={opacityAnimation}
-              initial="initial"
-              whileInView="final"
-              viewport={{ once: true }}
-              transition={{
-                ease: 'easeInOut',
-                duration: 1,
-                delay: 0.4,
-              }}
-            >
-        <p className='text-2xl pl-12 pt-5'>Movin Frens</p>
-       <div
-              className="py-10 md:px-4 bg-transparent rounded-lg grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 sm:grid-cols-3  
-          gap-20 w-full  max-w-full mx-auto px-10"
-            >
-              {MFAssets?.length == 0 && <p>No Assets Found</p>}
-              {MFAssets?.length>0 &&
-                MFAssets?.map((nft, index) => (
-                  <motion.div
-                    className="flex justify-center "
-                    key={index}
-                    variants={opacityAnimation}
-                    initial="initial"
-                    whileInView="final"
-                    viewport={{ once: true }}
-                    transition={{
-                      ease: 'easeInOut',
-                      duration: 0.6,
-                      delay: handleAnimationDelay(index, width),
-                    }}
-                  >
-                    <NFTView nft={nft} />
-                  </motion.div>
-                ))}
-            </div>
-       </motion.div>}
-       {TPFAssets?.length > 0 &&<motion.div
-              className="mt-8 bg-orange-100 bg-opacity-[10%]"
-              variants={opacityAnimation}
-              initial="initial"
-              whileInView="final"
-              viewport={{ once: true }}
-              transition={{
-                ease: 'easeInOut',
-                duration: 1,
-                delay: 0.4,
-              }}
-            >
-        <p className='text-2xl pl-12 pt-5'>The Plague Frogs</p>
-       <div
-              className="py-10 md:px-4 bg-transparent rounded-lg grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 sm:grid-cols-3  
-          gap-20 w-full  max-w-full mx-auto px-10"
-            >
-              {TPFAssets?.length == 0 && <p>No Assets Found</p>}
-              {TPFAssets?.length>0 &&
-                TPFAssets?.map((nft, index) => (
-                  <motion.div
-                    className="flex justify-center "
-                    key={index}
-                    variants={opacityAnimation}
-                    initial="initial"
-                    whileInView="final"
-                    viewport={{ once: true }}
-                    transition={{
-                      ease: 'easeInOut',
-                      duration: 0.6,
-                      delay: handleAnimationDelay(index, width),
-                    }}
-                  >
-                    <NFTView nft={nft} />
-                  </motion.div>
-                ))}
-            </div>
-       </motion.div>}
-       { SquishiAssets?.length > 0 && <motion.div
-              className="mt-8 bg-orange-100 bg-opacity-[10%]"
-              variants={opacityAnimation}
-              initial="initial"
-              whileInView="final"
-              viewport={{ once: true }}
-              transition={{
-                ease: 'easeInOut',
-                duration: 1,
-                delay: 0.4,
-              }}
-            >
-        <p className='text-2xl pl-12 pt-5'>The Squishiverse</p>
-       <div
-              className="py-10 md:px-4 bg-transparent rounded-lg grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 sm:grid-cols-3  
-          gap-20 w-full  max-w-full mx-auto px-10"
-            >
-              {SquishiAssets?.length == 0 && <p>No Assets Found</p>}
-              {SquishiAssets?.length>0 &&
-                SquishiAssets?.map((nft, index) => (
-                  <motion.div
-                    className="flex justify-center "
-                    key={index}
-                    variants={opacityAnimation}
-                    initial="initial"
-                    whileInView="final"
-                    viewport={{ once: true }}
-                    transition={{
-                      ease: 'easeInOut',
-                      duration: 0.6,
-                      delay: handleAnimationDelay(index, width),
-                    }}
-                  >
-                    <NFTView nft={nft} />
-                  </motion.div>
-                ))}
-            </div>
-       </motion.div>}
-       {culdAssets?.length> 0 && <motion.div
-              className="mt-8 bg-orange-100 bg-opacity-[10%]"
-              variants={opacityAnimation}
-              initial="initial"
-              whileInView="final"
-              viewport={{ once: true }}
-              transition={{
-                ease: 'easeInOut',
-                duration: 1,
-                delay: 0.4,
-              }}
-            >
-        <p className='text-2xl pl-12 pt-5'>The Cult DAO</p>
-       <div
-              className="py-10 md:px-4 bg-transparent rounded-lg grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 sm:grid-cols-3  
-          gap-20 w-full  max-w-full mx-auto px-10"
-            >
-              {culdAssets?.length == 0 && <p>No Assets Found</p>}
-              {culdAssets?.length>0 &&
-                culdAssets?.map((nft, index) => (
-                  <motion.div
-                    className="flex justify-center "
-                    key={index}
-                    variants={opacityAnimation}
-                    initial="initial"
-                    whileInView="final"
-                    viewport={{ once: true }}
-                    transition={{
-                      ease: 'easeInOut',
-                      duration: 0.6,
-                      delay: handleAnimationDelay(index, width),
-                    }}
-                  >
-                    <NFTView nft={nft} />
-                  </motion.div>
-                ))}
-            </div>
-       </motion.div>}
-       </>
-       }
-    </main>
-    </>
+      <>
+        <main className="p-4 pt-6 lg:px-16 min-h-screen">
+          {isMounted && (
+            <>
+              <motion.div
+                className="mt-8 text-center gap-3"
+                // variants={opacityAnimation}
+                initial="initial"
+                whileInView="final"
+                viewport={{ once: true }}
+                // transition={{
+                //   ease: "easeInOut",
+                //   duration: 0.1,
+                //   delay: 0.05,
+                // }}
+              >
+                <div className="text-center gap-5">
+                  {/* <h1 className="text-2xl font-bold text-center bg-[#63f7f5] bg-opacity-10">Account Info</h1> */}
+                  <br></br>
+                  <div className="relative justify-center flex gap-20 sm:gap-48">
+                    <div className="relative w-24 h-24">
+                      <Image
+                        className="rounded-full border border-gray-100 shadow-sm"
+                        src={userInfo?.image ? userInfo?.image : defaultImage}
+                        objectFit="fill"
+                        layout="fill"
+                      />
+                    </div>
+                  </div>
+                  <div className="pt-8 text-xl">
+                    <ul>
+                      <li className={`outline-0 inline-block`}>
+                        {userInfo?.user_name ? userInfo?.user_name : ""}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </motion.div>
+              <motion.div
+                className="mt-8"
+                // variants={opacityAnimation}
+                initial="initial"
+                whileInView="final"
+                viewport={{ once: true }}
+                // transition={{
+                //   ease: 'easeInOut',
+                //   duration: 1,
+                //   delay: 0.4,
+                // }}
+              >
+                <h2 className="text-3xl  font-semibold text-center ">
+                  User NFTs
+                </h2>
+              </motion.div>
+              {MFAssets?.length > 0 && (
+                <Collection name="Movin Frens" data={MFAssets} />
+              )}
+              {TPFAssets?.length > 0 && (
+                <Collection name="The Plague Frogs" data={TPFAssets} />
+              )}
+              {SquishiAssets?.length > 0 && (
+                <Collection name="The Squishiverse" data={SquishiAssets} />
+              )}
+              {culdAssets?.length > 0 && (
+                <Collection name={"The Cult Dao"} data={culdAssets} />
+              )}
+            </>
+          )}
+        </main>
+      </>
     </div>
-  )
-}
+  );
+};
 
-export default AccountPage
+export default AccountPage;

@@ -1,5 +1,4 @@
 
-import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useEffect,FC, useState } from 'react'
 import socketService from '../services/socketServices';
@@ -7,12 +6,11 @@ import JoinRoom from "../components/joinRoom";
 import GameContext, { IWarGameContextProps } from "../interfaces/warGame";
 import WarGame from '../components/war';
 import Player from '../components/player';
-import { useAccount, useConnect, useDisconnect,useSwitchNetwork,useNetwork, chainId } from 'wagmi'
+import { useAccount } from 'wagmi'
 import useIsMounted from '../utils/hooks/useIsMounted'
-import { createUser, getCultNFTs, getGame, getMFNFTs, getOpponent, getSquishiverseNFTs, getTpfNFTs, getUser } from '../react-query/queries'
+import { getGame,  getOpponent, getUser, getUserNfts } from '../react-query/queries'
 import { QUERIES } from '../react-query/constants'
-import { useMutation, useQuery } from 'react-query'
-import { queryClient } from '../react-query/queryClient'
+import {  useQuery } from 'react-query'
 
 
 const server = process.env.NEXT_PUBLIC_SERVER || ''
@@ -63,34 +61,27 @@ const Home = () => {
     const [roomData, setRoomData] = useState<GameRoom>(initialRoomData)
     const [UserDataSuccess,setUserDataSuccess] = useState(false)
     const [room, setRoom] = useState<any>()
-  const approvedCollections = ['0x61621722798e4370a0d965a5bd1fdd0f527699b1','0x8c3fb10693b228e8b976ff33ce88f97ce2ea9563', '0xbe0e87fa5bcb163b614ba1853668ffcd39d18fcb','0xc527ede68f14a4a52c32a1264cc02fb5ea6bb56d','0x5b80a9383ea914ad8eed822a5db1bd330baf2f6b']
 
-  const { data:tpfData } = useQuery(
-    [QUERIES.getTpfNFTs, connectedWallet, approvedCollections[1]],
-    () => getTpfNFTs(connectedWallet, approvedCollections[1], approvedCollections[2] )
-  )
 
-  const { data:cultData } = useQuery(
-    [QUERIES.getCultNFTs, connectedWallet, approvedCollections[0]],
-    () => getCultNFTs(connectedWallet, approvedCollections[0] )
-  )
-  
-    const { data:SquishiverseData } = useQuery(
-    [QUERIES.getSquishiverseNFTs, connectedWallet, approvedCollections[3]],
-    () => getSquishiverseNFTs(connectedWallet, approvedCollections[3] )
-  )
-  
-    const { data:MFData } = useQuery(
-    [QUERIES.getMFNFTs, address, approvedCollections[0]],
-    () => getMFNFTs(address, approvedCollections[4] )
-  )
+    const { data: user_nfts } = useQuery(
+      [QUERIES.get_user_nfts, connectedWallet],
+      () => getUserNfts(connectedWallet)
+    );
+
+    useEffect(() => {
+      if (user_nfts?.access) {
+        setIsAccess(true);
+      } else {
+        setIsAccess(false);
+      }
+    }, [user_nfts]);
 
     const {data:getGameInfo} = useQuery([QUERIES.getGame,roomData?.room_Id],()=>
     getGame(roomData?.room_Id)
   )
 
   const checkOpponent = async ()=> {
-    let addresses = getGameInfo?.data?.data?.addresses
+    let addresses = getGameInfo?.data?.addresses
     let opaddress = addresses?.player1 == address?addresses?.player2:addresses?.player1
     if(opaddress == '' || opaddress == undefined || opaddress == null) {
       return await setOpponentWallet(opponentWallet)
@@ -102,42 +93,37 @@ const Home = () => {
   useEffect(()=> {
     checkOpponent()
   })
-  useEffect(()=> {
-    if(tpfData?.data?.assets?.length>0 || cultData?.data?.assets?.length>0 || SquishiverseData?.data?.assets?.length>0 || MFData?.data?.assets?.length>0){
-      setIsAccess(true)
-    } else {
-      setIsAccess(false)
-      // setIsAccess(true)
-    }
-  },[cultData,tpfData, isMounted, SquishiverseData, MFData])
 
   useEffect(()=> {
     setWallet(address)
   }, [address])
 
-  const { data:UserData } = useQuery(
+  const { data:UserData, isFetched } = useQuery(
     [QUERIES.getUser, address],
     () => getUser(address)
   )
   
+
   useEffect(()=> {
     setRoom(getGameInfo)
   },[getGameInfo])
 
-  useEffect(()=> {
-    setUserInfo(UserData?.data?.data)
-    setUserDataSuccess(true)
-  }, [UserData])
+  useEffect(() => {
+    if (isFetched && UserData?.success === true) {
+      setUserInfo(UserData?.data);
+    } 
+  }, [UserData, isFetched]);
 
-  const { data:OpponentData, refetch:refetchOpponent } = useQuery(
+  const { data:OpponentData } = useQuery(
     [QUERIES.getOpponent, opponentWallet],
     () => getOpponent(opponentWallet)
   )
   
-  useEffect(()=> {
-    setOpponent(OpponentData?.data?.data)
-  }, [OpponentData, opponent])
-
+    useEffect(() => {
+      if (OpponentData?.success === true) {
+        setOpponent(OpponentData?.data);
+      }
+    }, [OpponentData]);
 
     const checkRoom = (_value:any)=> {
       if(_value) {

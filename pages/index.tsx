@@ -2,20 +2,11 @@
 import { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useEffect,FC, useState } from 'react'
-// import Head from 'next/head';
-// import { opacityAnimation } from '../utils/animations'
-// import { io } from "socket.io-client";
-import socketService from '../services/socketServices';
-import JoinRoom from "../components/joinRoom";
-import GameContext, { IWarGameContextProps } from "../interfaces/warGame";
-// import Game  from "../components/game";
-// import styled from 'styled-components';
-// import { IWarGameContextProps } from '../interfaces/GameInterface';
-import WarGame from '../components/war';
+
 import { useAccount } from 'wagmi';
 import { useQuery } from 'react-query';
 import { QUERIES } from '../react-query/constants';
-import { getCultNFTs, getSquishiverseNFTs, getTpfNFTs } from '../react-query/queries';
+import {  getUserNfts } from '../react-query/queries';
 import useIsMounted from '../utils/hooks/useIsMounted';
 const server = process.env.NEXT_PUBLIC_SERVER || ''
 const Home = () => {
@@ -25,29 +16,18 @@ const Home = () => {
     const [isUserAccess, setUserAccess] = useState(false)
     const [connectedWallet,setWallet] = useState<any>('NA')
 
-  const approvedCollections = ['0x61621722798e4370a0d965a5bd1fdd0f527699b1','0x8c3fb10693b228e8b976ff33ce88f97ce2ea9563', '0xbe0e87fa5bcb163b614ba1853668ffcd39d18fcb','0xc527ede68f14a4a52c32a1264cc02fb5ea6bb56d']
-
-  const { data:tpfData } = useQuery(
-    [QUERIES.getTpfNFTs, connectedWallet, approvedCollections[1]],
-    () => getTpfNFTs(connectedWallet, approvedCollections[1], approvedCollections[2] )
-  )
-
-  const { data:cultData } = useQuery(
-    [QUERIES.getCultNFTs, connectedWallet, approvedCollections[0]],
-    () => getCultNFTs(connectedWallet, approvedCollections[0] )
-  )
+  const { data: user_nfts } = useQuery(
+    [QUERIES.get_user_nfts, connectedWallet],
+    () => getUserNfts(connectedWallet)
+  );
   
-    const { data:SquishiverseData } = useQuery(
-    [QUERIES.getSquishiverseNFTs, connectedWallet, approvedCollections[3]],
-    () => getSquishiverseNFTs(connectedWallet, approvedCollections[3] )
-  )
   useEffect(()=> {
-    if(tpfData?.data?.assets?.length>0 || cultData?.data?.assets?.length>0 || SquishiverseData?.data?.assets?.length>0){
+    if(user_nfts?.access){
       setUserAccess(true)
     } else {
       setUserAccess(false)
     }
-  },[cultData,tpfData, SquishiverseData])
+  },[user_nfts])
 
   useEffect(()=> {
     setWallet(address)

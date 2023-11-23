@@ -24,8 +24,8 @@ const Player:FC<{you:User, opponent:User}> = ({you, opponent}) => {
   return (
     <>
     <div className="relative justify-center flex gap-20 sm:gap-48">
-    <div><div className="relative w-24 h-24"><Image className="rounded-full border border-gray-100 shadow-sm" src={you?.image?you?.image:defaultImage} objectFit="fill" layout="fill"/></div><p>{you?.user_name?you?.user_name:'You'}</p></div>
-    <div><div className="relative w-24 h-24"><Image className="rounded-full border border-gray-100 shadow-sm" src={opponent?.image?opponent?.image:defaultImage} objectFit="fill" layout="fill"/></div><p>{opponent?.user_name?opponent?.user_name:'Opponent'}</p></div>
+    <div><div className="relative w-24 h-24"><Image className="rounded-full border border-gray-100 shadow-sm" src={you?.image || defaultImage} objectFit="fill" layout="fill"/></div><p>{you?.user_name || 'You'}</p></div>
+    <div><div className="relative w-24 h-24"><Image className="rounded-full border border-gray-100 shadow-sm" src={opponent?.image || defaultImage} objectFit="fill" layout="fill"/></div><p>{opponent?.user_name || 'Opponent'}</p></div>
     </div>
     </>
   );
