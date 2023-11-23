@@ -29,15 +29,15 @@ const CreateAccount: FC<{ handleUserInput: (_name:any, _value: any) => void, cre
     <>
     <motion.div
               className="mt-8 text-xs justify-center"
-              variants={opacityAnimation}
+              // variants={opacityAnimation}
               initial="initial"
               whileInView="final"
               viewport={{ once: true }}
-              transition={{
-                ease: 'easeInOut',
-                duration: 1,
-                delay: 0.5,
-              }}
+              // transition={{
+              //   ease: 'easeInOut',
+              //   duration: 1,
+              //   delay: 0.5,
+              // }}
             >
 
      <div><p>Enter Username</p></div>
@@ -85,20 +85,13 @@ const SettingPage: NextPage = () => {
         }
     }
 
-    const { data:UserData } = useQuery(
-    [QUERIES.getUser, address],
-    () => getUser(address)
-  )
-
-    useEffect(()=> {
-    if(!UserData?.data?.message && address) {
-        setIfNewUser(true)
-    }
-    }, [UserData,address])
+    const { data: UserData, isFetched } = useQuery(
+      [QUERIES.getUser, address],
+      () => getUser(address)
+    );
 
     const handleUserInput = (_name:any,_value:any) => {
         if(!_name || !_value) return;
-        console.log(_value)
         setFormData((prevData) => ({
         ...prevData,
         [_name]: _value,
@@ -108,9 +101,13 @@ const SettingPage: NextPage = () => {
 
 
 
-  useEffect(()=> {
-    setUserInfo(UserData?.data?.data)
-  }, [UserData])
+  useEffect(() => {
+    if (isFetched && UserData?.success === true) {
+      setUserInfo(UserData?.data);
+    } else if (isFetched && UserData?.success === false) {
+      setIfNewUser(true);
+    }
+  }, [UserData, isFetched]);
 
 
   const { mutate:createData } = useMutation(
@@ -124,9 +121,8 @@ const SettingPage: NextPage = () => {
 
     const updateUser = async ()=> {
         if(address) {
-        console.log(formData)
         const { name } = formData
-         await createData({name:name,wallet_address:address,image:userInfo?.image})
+         await createData({user_name:name,wallet_address:address})
          return await router.push('/profile');
         }
     }
@@ -139,10 +135,10 @@ const SettingPage: NextPage = () => {
         })
   }
 })
-    useEffect(()=> {
-        // if(isConnected && isUser) router.back()
-    })
-    // let checkIfNewUser = isConnected && !isUser
+    // useEffect(()=> {
+    //     // if(isConnected && isUser) router.back()
+    // })
+    // // let checkIfNewUser = isConnected && !isUser
 
   return (
     <>

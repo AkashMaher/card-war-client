@@ -741,98 +741,156 @@ useEffect(()=> {
 
   return (
     <>
-    
-   <div className="w-[100%] h-[450px] sm:w-[520px] sm:h-[600px] ">
-   <div className="flex flex-col items-center justify-between gap-2 p-4 bg-[#0b0116] bg-opacity-80  border-2 border-zinc-900  box-border border-solid rounded-xl m-5">
-        {/* {isGameStarted && !isSuffled && <button  onClick={()=> suffleCards()}>Suffle Cards</button> } */}
-        
-        <><h3 className="text-white m-0 font-bold text-xl font-sans">{isGameStarted?"A Game of War!":`ROOM ID : ${roomId}`}</h3>
-        
-        <h3 className="text-white m-0 font-semibold text-base font-sans">{isGameStarted?(yourCard?.value>0 && opponentCard?.value>0?resultMessage:!isSuffled?'Joined Lobby':(data?.isYourTurn?"Your Turn":'Opponent Turn')):''}</h3>
-        </>
-        
-        
-        <div className="flex items-center  gap-16 text-white p-8 pt-8">
-            {isSuffled && !gameOver && 
-            <>
-            <div className="flex flex-col items-center">
-                {/* <p className="m-0 mt-2 font-sans">{`${yourCard?.suit? yourCard?.suit:''} ${yourCard?.value?yourCard?.value-1:'Card'}`}</p> */}
-                <div ><Image src={drawnYour?drawnYour:`/images/cards/wait_card.png`} width={'190px'} height={'250px'}/></div>
-                <p className="m-0 mt-2 text-sm font-sans w-20">{'You'}</p>
-            </div>
-            <div className="flex flex-col items-center">
-                {/* <p className="m-0 mt-2 font-sans">{`${opponentCard?.suit? opponentCard?.suit:''} ${opponentCard?.value?opponentCard?.value-1:'Card'}`}</p> */}
-                <div ><Image src={drawnOpponent?drawnOpponent:`/images/cards/wait_card.png`} width={'190px'} height={'250px'}/></div>
-                <p className="m-0 mt-2 text-sm font-sans w-20">Opponent</p>
-            </div> 
-            </>}
-            {
-              isGameStarted && !isSuffled && !gameOver && 
+      <div className="w-[100%] h-[450px] sm:w-[520px] sm:h-[600px] ">
+        <div className="flex flex-col items-center justify-between gap-2 p-4 bg-[#0b0116] bg-opacity-80  border-2 border-zinc-900  box-border border-solid rounded-xl m-5">
+          {/* {isGameStarted && !isSuffled && <button  onClick={()=> suffleCards()}>Suffle Cards</button> } */}
+
+          <>
+            <h3 className="text-white m-0 font-bold text-xl font-sans">
+              {isGameStarted ? "A Game of War!" : `ROOM ID : ${roomId}`}
+            </h3>
+
+            <h3 className="text-white m-0 font-semibold text-base font-sans">
+              {isGameStarted
+                ? yourCard?.value > 0 && opponentCard?.value > 0
+                  ? resultMessage
+                  : !isSuffled
+                  ? "Joined Lobby"
+                  : data?.isYourTurn
+                  ? "Your Turn"
+                  : "Opponent Turn"
+                : ""}
+            </h3>
+          </>
+
+          <div className="flex items-center  gap-16 text-white p-8 pt-8">
+            {isSuffled && !gameOver && (
               <>
-              <div className="text-lg font-bold font-sans flex flex-col items-center sm:w-[520px] sm:h-[316px] w-[310px] h-[300px] sm:text-xl gap-5">
-                
-                <p >Suffle Cards to Start Game</p>
-                <p ></p>
-                <p ></p>
-                <div ><Image src={`/images/game_start_wait.png`} width={'250px'} height={'130px'}/></div>
-                <button 
-                  className="outline-none text-xl p-3 rounded-[12px] bg-violet-900 text-[#ffffff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 mt-4 cursor-pointer bg-gradient-to-r hover:border-2 hover:text-[#b779d1] align-middle "
-                  onClick={()=> suffleCards()} >
-                            {"Shuffle Cards"}
-                </button>
-                {/* <div ><Image src={drawnOpponent?drawnOpponent:`/images/cards/wait_card.png`} width={'520px'} height={'316px'}/></div> */}
-                <p className="m-0 mt-2 text-lg font-sans"></p>
-            </div>  
+                <div className="flex flex-col items-center">
+                  {/* <p className="m-0 mt-2 font-sans">{`${yourCard?.suit? yourCard?.suit:''} ${yourCard?.value?yourCard?.value-1:'Card'}`}</p> */}
+                  <div>
+                    <Image
+                      src={
+                        drawnYour ? drawnYour : `/images/cards/wait_card.png`
+                      }
+                      width={"190px"}
+                      height={"250px"}
+                    />
+                  </div>
+                  <p className="m-0 mt-2 text-sm font-sans w-20">{"You"}</p>
+                </div>
+                <div className="flex flex-col items-center">
+                  {/* <p className="m-0 mt-2 font-sans">{`${opponentCard?.suit? opponentCard?.suit:''} ${opponentCard?.value?opponentCard?.value-1:'Card'}`}</p> */}
+                  <div>
+                    <Image
+                      src={
+                        drawnOpponent
+                          ? drawnOpponent
+                          : `/images/cards/wait_card.png`
+                      }
+                      width={"190px"}
+                      height={"250px"}
+                    />
+                  </div>
+                  <p className="m-0 mt-2 text-sm font-sans w-20">Opponent</p>
+                </div>
               </>
-            }
-            {
-              isGameStarted && gameOver && !isSuffled && <>
-              <div className="text-3xl font-sans flex flex-col items-center sm:w-[520px] sm:h-[316px] w-[310px] h-[300px] sm:text-xl gap-6">
-                
-                {/* <p >{resultMessage}</p> */}
-                <p className="text-xl">{resultMessage=='You Won The Game'?"Congratulations":'Better Luck Next Time'}</p>
-                <p ></p>
-                <div ><Image src={`/images/game_win.png`} width={'127px'} height={'116px'}/></div>
-                <button 
-                  className="outline-none text-xl p-3 rounded-[12px] bg-violet-900 text-[#ffffff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 mt-4 cursor-pointer bg-gradient-to-r hover:border-2 hover:text-[#b779d1] align-middle "
-                  onClick={()=> refreshPage()} >
-                            {"Play Again"}
-                </button>
-                {/* <div ><Image src={drawnOpponent?drawnOpponent:`/images/cards/wait_card.png`} width={'520px'} height={'316px'}/></div> */}
-                <p className="m-0 mt-2 text-lg font-sans"></p>
-            </div>  
+            )}
+            {isGameStarted && !isSuffled && !gameOver && (
+              <>
+                <div className="text-lg font-bold font-sans flex flex-col items-center sm:w-[520px] sm:h-[316px] w-[310px] h-[300px] sm:text-xl gap-5">
+                  <p>Suffle Cards to Start Game</p>
+                  <p></p>
+                  <p></p>
+                  <div>
+                    <Image
+                      src={`/images/game_start_wait.png`}
+                      width={"250px"}
+                      height={"130px"}
+                    />
+                  </div>
+                  <button
+                    className="outline-none text-xl p-3 rounded-[12px] bg-violet-900 text-[#ffffff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 mt-4 cursor-pointer bg-gradient-to-r hover:border-2 hover:text-[#b779d1] align-middle "
+                    onClick={() => suffleCards()}
+                  >
+                    {"Shuffle Cards"}
+                  </button>
+                  {/* <div ><Image src={drawnOpponent?drawnOpponent:`/images/cards/wait_card.png`} width={'520px'} height={'316px'}/></div> */}
+                  <p className="m-0 mt-2 text-lg font-sans"></p>
+                </div>
               </>
-            }
-            {
-              !isGameStarted && <>
-              <div className="text-3xl font-sans flex flex-col items-center sm:w-[520px] sm:h-[316px] w-[310px] h-[300px] sm:text-xl gap-6">
-                
-                <p >Share Room ID</p>
-                <p >With</p>
-                <p >Your Friend</p>
-                <button 
-                  className="outline-none text-xl p-3 rounded-[12px] bg-violet-900 text-[#ffffff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 mt-4 cursor-pointer bg-gradient-to-r hover:border-2 hover:text-[#b779d1] align-middle "
-                  onClick={()=> copyRoomId()} >
-                            {copyText}
-                </button>
-                {/* <div ><Image src={drawnOpponent?drawnOpponent:`/images/cards/wait_card.png`} width={'520px'} height={'316px'}/></div> */}
-                <p className="m-0 mt-2 text-lg font-sans"></p>
-            </div> 
+            )}
+            {isGameStarted && gameOver && !isSuffled && (
+              <>
+                <div className="text-3xl font-sans flex flex-col items-center sm:w-[520px] sm:h-[316px] w-[310px] h-[300px] sm:text-xl gap-6">
+                  {/* <p >{resultMessage}</p> */}
+                  <p className="text-xl">
+                    {resultMessage == "You Won The Game"
+                      ? "Congratulations"
+                      : "Better Luck Next Time"}
+                  </p>
+                  <p></p>
+                  <div>
+                    <Image
+                      src={
+                        resultMessage == "You Won The Game"
+                          ? `/images/game_win.png`
+                          : `/images/game_lose.png`
+                      }
+                      width={"127px"}
+                      height={"116px"}
+                    />
+                  </div>
+                  <button
+                    className="outline-none text-xl p-3 rounded-[12px] bg-violet-900 text-[#ffffff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 mt-4 cursor-pointer bg-gradient-to-r hover:border-2 hover:text-[#b779d1] align-middle "
+                    onClick={() => refreshPage()}
+                  >
+                    {"Play Again"}
+                  </button>
+                  {/* <div ><Image src={drawnOpponent?drawnOpponent:`/images/cards/wait_card.png`} width={'520px'} height={'316px'}/></div> */}
+                  <p className="m-0 mt-2 text-lg font-sans"></p>
+                </div>
               </>
-            }
-        </div>
-        
-        {/* <p className="text-white m-0 text-2xl font-mono font-bold ">Remaining Cards<span id="remainingCards"> 52</span></p> */}
-        {/* <button onClick={()=> DrawYourCard()}>Draw</button> */}
-        
-           {isGameStarted && !gameOver && isSuffled && <button className="outline-none text-sm sm:text-base p-1 sm:p-3 rounded-[12px] bg-violet-900 text-[#fff] border-transparent border-solid border-0.5 border-r-1 px-2 py-18 cursor-pointer  hover:border-1 hover:text-[#bee2ef] " 
-           onClick={()=>  (!isSuffled ?suffleCards(): DrawYourCard())} disabled={!data?.isYourTurn}>
-            {(!isSuffled?"Suffle Cards":"Draw Card")}
+            )}
+            {!isGameStarted && (
+              <>
+                <div className="text-3xl font-sans flex flex-col items-center sm:w-[520px] sm:h-[316px] w-[310px] h-[300px] sm:text-xl gap-6">
+                  <p>Share Room ID</p>
+                  <p>With</p>
+                  <p>Your Friend</p>
+                  <button
+                    className="outline-none text-xl p-3 rounded-[12px] bg-violet-900 text-[#ffffff] font-md border-transparent border-solid border-2 border-r-4 px-4 py-18 mt-4 cursor-pointer bg-gradient-to-r hover:border-2 hover:text-[#b779d1] align-middle "
+                    onClick={() => copyRoomId()}
+                  >
+                    {copyText}
+                  </button>
+                  {/* <div ><Image src={drawnOpponent?drawnOpponent:`/images/cards/wait_card.png`} width={'520px'} height={'316px'}/></div> */}
+                  <p className="m-0 mt-2 text-lg font-sans"></p>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* <p className="text-white m-0 text-2xl font-mono font-bold ">Remaining Cards<span id="remainingCards"> 52</span></p> */}
+          {/* <button onClick={()=> DrawYourCard()}>Draw</button> */}
+
+          {isGameStarted && !gameOver && isSuffled && (
+            <button
+              className="outline-none text-sm sm:text-base p-1 sm:p-3 rounded-[12px] bg-violet-900 text-[#fff] border-transparent border-solid border-0.5 border-r-1 px-2 py-18 cursor-pointer  hover:border-1 hover:text-[#bee2ef] "
+              onClick={() => (!isSuffled ? suffleCards() : DrawYourCard())}
+              disabled={!data?.isYourTurn}
+            >
+              {!isSuffled ? "Suffle Cards" : "Draw Card"}
             </button>
-            }
-         {isSuffled &&<p className="text-white text-xs md:text-base">Remaining Cards : You = {data?.cards?.you.length} , Opponent = {data?.cards?.opponent.length}</p>}
-    </div>
-    </div>
+          )}
+          {isSuffled && (
+            <p className="text-white text-xs md:text-base">
+              Remaining Cards : You = {data?.cards?.you.length} , Opponent ={" "}
+              {data?.cards?.opponent.length}
+            </p>
+          )}
+        </div>
+      </div>
     </>
   );
 }
