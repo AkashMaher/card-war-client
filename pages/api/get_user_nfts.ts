@@ -28,8 +28,7 @@ export default async function handler(
   res: NextApiResponse<any>
 ) {
   try {
-    // const userAddress = req.query.userAddress;
-    const userAddress = "0x2F1b87C0EE11e810b8Bf9B5D78e70D400eb3f645";
+    const userAddress = req.query.userAddress;
     if (!userAddress)
       return res
         .status(403)

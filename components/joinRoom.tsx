@@ -16,7 +16,7 @@ import { getGame, getUser, updateGame } from "../react-query/queries";
 import { queryClient } from "../react-query/queryClient";
 import { GameRoom } from "../pages/play";
 
-const baseURL = process.env.NEXT_PUBLIC_DB_API || "";
+
 const JoinRoom: FC<{
   checkRoom: (_value: any) => void;
   setGameStarted: (_value: boolean) => void;
